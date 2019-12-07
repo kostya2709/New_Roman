@@ -1,0 +1,7 @@
+begin
+var2 assign 5#
+var1 assign var2#
+var1 assign 2+var1#
+var2 read#
+(var1)invades(var2)#
+end
