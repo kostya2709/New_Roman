@@ -1,7 +1,11 @@
 #include "Front_Head.h"
 
+#define N_TYPE (*program_node)->node_type
+#define N_DATA (*program_node)->data
 
-Hash hash;
+static Hash hash;
+
+void Check_End_Line ();
 
 Node** program_node = NULL;
 
@@ -17,6 +21,8 @@ Node* Get_Top (void);
 
 Node* Get_Pow (void);
 
+Node* Get_If (void);
+
 Node* Get_Pbrack (void);
 
 Node* Func (char* oper);
@@ -29,7 +35,11 @@ Node* Get_Line (void);
 
 Node* Get_Link (void);
 
-Node* Get_General (Node** prog_node)
+Node* Get_Conditions (void);
+
+Node* Get_One_Cond ();
+
+Node* Get_General (Node** prog_node, Hash** hash1)
 {
     program_node = prog_node;
     Node* result = Create_Node(NULL, Get_Brackets(), NULL, 27, "PROGRAM", OPERATOR);
@@ -37,31 +47,37 @@ Node* Get_General (Node** prog_node)
         ;
     else
     {
-        printf ("Expected end of the program, received data = %lg, type = %d\n", (*program_node)->data, (*program_node)->node_type == OPERATOR);
+        printf ("Expected end of the program, received \"%s\"\n", (*program_node)->sym);
         abort();
     }
+    *hash1 = &hash;
     return result;
 }
 
 Node* Get_Brackets()
 {
+
     if (((*program_node)->data == BEGIN) && (*program_node)->node_type == K_WORD)
         program_node++;
     else
     {
-        printf ("Expected %s, data = %lg, begin = %d\n", key_words_str[BEGIN], (*program_node)->data, hash.k_words[BEGIN]);
+        printf ("Expected \"%s\", received \"%s\".\n", key_words_str[BEGIN], (*program_node)->sym);
         abort();
     }
+
+    Check_End_Line ();
 
     Node* temp = Get_Link();
 
-    if ((*program_node)->data == END && (*program_node)->node_type == K_WORD)
+    if (((*program_node)->data == END) && (*program_node)->node_type == K_WORD)
         program_node++;
     else
     {
-        printf ("Expected %s\n", key_words_str[END]);
+        printf ("Expected \"%s\", received \"%s\".\n", key_words_str[END], (*program_node)->sym);
         abort();
     }
+
+    Check_End_Line();
 
     for (int i =0; i < hash.var_amount; i++)
         printf ("%d %d\n", i, hash.var[i]);
@@ -74,14 +90,13 @@ Node* Get_Link ()
 {
     Node* left = Get_Line();
     if ((*program_node)->data == END && (*program_node)->node_type == K_WORD)
-        return Create_Node (left, NULL, NULL, LINK, "LINK", K_WORD);
+        return Create_Node (left, NULL, NULL, LINK, "LINK", LINK);
     else
-        return Create_Node (left, Get_Link(), NULL, LINK, "LINK", K_WORD);
+        return Create_Node (left, Get_Link(), NULL, LINK, "LINK", LINK);
 }
 
 Node* Get_Line()
 {
-
     Node* temp = *program_node;
 
     switch ((*program_node)->node_type)
@@ -134,41 +149,19 @@ Node* Get_Line()
         }
         case K_WORD:
         {
-            if ((*program_node)->data == OPEN_BR)
-            {
-                Node* left = Get_Expr();
-                if ((*program_node)->node_type == K_WORD && (*program_node)->data == INVADE)
-                    ;
-                else
-                {
-                    printf ("Expected comparison using \"%s\", received \"%s\"\n", key_words_str[INVADE], (*program_node)->sym);
-                    exit(0);
-                }
-                program_node++;
-                if ((*program_node)->data != OPEN_BR || (*program_node)->node_type != K_WORD)
-                {
-                    printf ("Expected an opening bracket for the second part of comparison\n");
-                    printf ("Received \"%s\"\n", (*program_node)->sym);
-                    exit(0);
-                }
-                Node* right = Get_Expr();
-                temp = Create_Node(left, right, NULL, 0, "SLINK", K_WORD);
-            }
+            if ((*program_node)->data == SUDDENLY)
+                temp = Get_If();
         }
+        break;
     }
-    if ((*program_node)->node_type == K_WORD && (*program_node)->data == ENDLN)
-        program_node++;
-    else
-    {
-        printf ("Expected \"%s\" as a line terminating symbol, received data = %lg, type = %d\n", key_words_str[ENDLN], (*program_node)->data, (*program_node)->node_type);
-        abort();
-    }
+
+    Check_End_Line();
+
     return temp;
 }
 
 Node* Get_Number (void)
 {
-    printf ("number is %lg\n", (*program_node)->data);
     program_node++;
     return *(program_node - 1);
 }
@@ -249,7 +242,7 @@ Node* Func ()
     if (!(((*program_node)->node_type == K_WORD) && ((*program_node)->data == CLOSE_BR)))
     {
         printf ("Expected a closing bracket after function %s!\n", prev->sym);
-        printf ("Recieved data = %lg, type = %d instead!\n", (*program_node)->data, (*program_node)->node_type);
+        printf ("Recieved %s\n", (*program_node)->sym);
         system ("pause");
     }
     program_node++;
@@ -270,7 +263,7 @@ Node* Get_Str (void)
         }
         else
         {
-            printf ("This variable \"%s\" was not declared in this scope!\n", (*program_node)->sym);
+            printf ("This citizen, \"%s\", was not born yet!\n", (*program_node)->sym);
             abort();
         }
 
@@ -284,10 +277,184 @@ Node* Get_Pow (void)
         program_node++;
         Node* val2 = Get_Pbrack();
 
-        val = Create_Node (val, val2, NULL, POW, "^", OPERATOR);
+        val = Create_Node (val, val2, NULL, POW, oper_str[POW], OPERATOR);
     }
 assert (val);
     return val;
 }
 
-//Node* Get_Conditions
+Node* Get_Conditions (void)
+{
+    if (((*program_node)->data == BEGIN) && (*program_node)->node_type == K_WORD)
+        program_node++;
+    else
+    {
+        printf ("Expected \"%s\", received \"%s\".\n", key_words_str[BEGIN], (*program_node)->sym);
+        abort();
+    }
+
+    Check_End_Line ();
+
+    Node* temp = Get_One_Cond();
+
+    if (((*program_node)->data == END) && (*program_node)->node_type == K_WORD)
+        program_node++;
+    else
+    {
+        printf ("Expected \"%s\", received \"%s\".\n", key_words_str[END], (*program_node)->sym);
+        abort();
+    }
+
+    return temp;
+}
+
+Node* Get_One_Cond ()
+{
+    if ((*program_node)->node_type != K_WORD)
+    {
+        printf ("Expected a condition, received \"%s\"\n", (*program_node)->sym);
+        exit(0);
+    }
+
+    bool in_cycle = 0;
+
+    if ((*program_node)->data == CYCLE)
+    {
+        in_cycle = 1;
+        program_node++;
+        Check_End_Line();
+
+        if ((*program_node)->node_type != K_WORD)
+        {
+            printf ("Expected a condition, received \"%s\"\n", (*program_node)->sym);
+            exit(0);
+        }
+    }
+
+    Node* temp = NULL;
+
+    Node* temp2 = NULL;
+
+    Node* cyc = NULL;
+
+    switch ((int)((*program_node)->data))
+    {
+        case (MORE):
+        {
+            temp = Create_Node (NULL, NULL, NULL, MORE, "A", OPERATOR);
+            break;
+        }
+        case (EMORE):
+        {
+            temp = Create_Node (NULL, NULL, NULL, EMORE, "AE", OPERATOR);
+            break;
+        }
+        case (LESS):
+        {
+            temp = Create_Node (NULL, NULL, NULL, LESS, "L", OPERATOR);
+            break;
+        }
+        case (ELESS):
+        {
+            temp = Create_Node (NULL, NULL, NULL, ELESS, "LE", OPERATOR);
+            break;
+        }
+        case (EQUAL):
+        {
+            temp = Create_Node (NULL, NULL, NULL, EQUAL, "E", OPERATOR);
+            break;
+        }
+        case (UNEQUAL):
+        {
+            temp = Create_Node (NULL, NULL, NULL, UNEQUAL, "UE", OPERATOR);
+            break;
+        }
+        case (ELSE):
+        {
+            temp = Create_Node (NULL, NULL, NULL, ELSE, "ELSE", OPERATOR);
+            break;
+        }
+        default:
+        {
+            printf ("Unexpected type of condition, received \"%s\".\n", (*program_node)->sym);
+            break;
+        }
+    }
+    program_node++;
+
+    if ((*program_node)->node_type == END_LINE)
+    {
+        program_node++;
+        temp2 = Get_Brackets();
+    }
+    else
+    {
+        temp2 = Get_Line();
+        Node* temp_temp = Create_Node (temp2, NULL, NULL, LINK, "LINK", LINK);
+        temp2 = temp_temp;
+    }
+
+    temp->left = temp2;
+    temp2->parent = temp;
+
+    if ((*program_node)->node_type == K_WORD && (*program_node)->data == END)
+    {
+        if (in_cycle)
+            return Create_Node (temp, NULL, NULL, CYCLE, "WHILE", K_WORD);
+
+        return temp;
+    }
+    else
+    {
+        Node* temp3 = Get_One_Cond();
+
+        if (in_cycle)
+        {
+            cyc = Create_Node (temp, NULL, NULL, CYCLE, "WHILE", K_WORD);
+            cyc->right = temp3;
+            temp3->parent = cyc;
+            return cyc;
+        }
+
+        temp->right = temp3;
+        temp3->parent = temp;
+
+        return temp;
+    }
+}
+
+Node* Get_If (void)
+{
+
+    program_node++;
+    Node* left = Get_Expr();
+    if ((*program_node)->node_type == K_WORD && (*program_node)->data == INVADE)
+            ;
+    else
+    {
+        printf ("Expected comparison using \"%s\", received \"%s\"\n", key_words_str[INVADE], (*program_node)->sym);
+        exit(0);
+    }
+    program_node++;
+
+    Node* right = Get_Expr();
+
+    Check_End_Line();
+
+    Node* temp = Create_Node(left, right, NULL, INVADE, "SLINK", LINK);
+
+    temp = Create_Node (temp, Get_Conditions(), NULL, INVADE, "SLINK", LINK);
+
+    return temp;
+}
+
+void Check_End_Line ()
+{
+    if ((*program_node)->node_type == END_LINE)
+        program_node++;
+    else
+    {
+        printf ("Expected \"\\n\" as a line terminating symbol, received \"%s\"\n", (*program_node)->sym);
+        abort();
+    }
+}

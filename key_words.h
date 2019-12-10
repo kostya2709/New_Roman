@@ -4,7 +4,6 @@ enum k_words
     NIL,
     INVADE,
     CYCLE,
-    ENDLN,
     BEGIN,
     END,
     MORE,
@@ -17,30 +16,33 @@ enum k_words
     PRINT,
     OPEN_BR,
     CLOSE_BR,
-    READ
+    READ,
+    SUDDENLY,
+    ELSE
 };
 
 
-const int K_WORDS_NUMBER = 17;
+const int K_WORDS_NUMBER = 18;
 static char* key_words_str[] =
 {
     "null",
     "invades",
     "till_the_end",
-    "#",
-    "begin",
-    "end",
-    "glorious victory:",
-    "slight victory:",
-    "grievous defeat:",
-    "slight defeat:",
-    "equal forces:",
-    "unequal forces:",
+    "AVE_MARIA!",
+    "DEUS_VULT!",
+    "glorious_victory:",
+    "slight_victory:",
+    "grievous_defeat:",
+    "slight_defeat:",
+    "equal_forces:",
+    "unequal_forces:",
     "assign",
     "performs_in_senate",
     "(",
     ")",
-    "read"
+    "read",
+    "suddenly",
+    "else:"
 };
 
 
@@ -49,7 +51,8 @@ enum node_types {
                         OPERATOR,
                         VAR,
                         K_WORD,
-                        LINK
+                        LINK,
+                        END_LINE
                 };
 
 enum operator_num   {

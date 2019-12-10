@@ -1,7 +1,17 @@
-begin
-var2 assign 5#
-var1 assign var2#
-var1 assign 2+var1#
-var2 read#
-(var1)invades(var2)#
-end
+AVE_MARIA!
+
+i assign 0
+Kostyaa assign 10
+
+suddenly 3 invades i
+AVE_MARIA!
+till_the_end
+glorious_victory:
+AVE_MARIA!
+i assign i + 1
+Kostyaa performs_in_senate
+i performs_in_senate
+DEUS_VULT!
+DEUS_VULT!
+
+DEUS_VULT!

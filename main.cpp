@@ -18,6 +18,10 @@ int main()
     program_str = File_Reader (program_name, &num_lines, &program_size);
     printf ("%s\n", program_str);
 
+
+    printf ("hash Kostya = %d\n", Make_Hash_Str("Kostya"));
+    printf ("hash arccos = %d\n", Make_Hash_Str("arccos"));
+
     int com_num = 0;
 
     Node** node_line = Tokenization (program_str, com_num);
@@ -29,10 +33,13 @@ int main()
         printf ("%i data = %lg, type = %d\n", i, node_line[i]->data, node_line[i]->node_type);
     }
 
+    Hash* hash;
     Tree prog_tree;
-    prog_tree.Insert_Node(Get_General(node_line));
+    prog_tree.Insert_Node(Get_General(node_line, &hash));
     prog_tree.Tree_Simplifier(prog_tree.first_elem);
     prog_tree.Dump();
+
+    Back_End (prog_tree.first_elem, hash);
 
     free (program_name);
     free (program_str);

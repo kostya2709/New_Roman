@@ -32,8 +32,12 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
+		<Unit filename="Back_end.cpp" />
+		<Unit filename="Expression_Develop.cpp" />
 		<Unit filename="File_Reader.cpp" />
 		<Unit filename="Front_Head.h" />
+		<Unit filename="Hash.cpp" />
+		<Unit filename="Recursive_Descend.cpp" />
 		<Unit filename="Tokenization.cpp" />
 		<Unit filename="Tree_Funcs.cpp" />
 		<Unit filename="Tree_Head.h" />

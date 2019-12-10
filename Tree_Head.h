@@ -103,6 +103,18 @@ private:
 
 };
 
+struct Hash
+{
+    int* oper;
+    int* var;
+    int var_amount;
+    int* k_words;
+
+    Hash();
+    ~Hash();
+    int Add_Var (int var_name);
+};
+
 char* Delete_Str_Trash (char* str);
 
 /*! Converts path from int into char* */
@@ -122,7 +134,7 @@ int File_Clean ();
 
 int Write_Expr_To_PDF (Node* node1, int bracket);
 
-Node* Get_General (Node** prog_node);
+Node* Get_General (Node** prog_node, Hash** hash1);
 
 int Compile_LaTex (void);
 

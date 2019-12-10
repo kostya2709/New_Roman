@@ -1,6 +1,7 @@
 #include "Front_Head.h"
 
 
+
 Node** Tokenization (const char* program_str, int& com_num)
 {
     Hash hash;
@@ -29,11 +30,19 @@ printf ("sym = %c\n", *program_str);
 
         if (isdigit (cur_sym) || (cur_sym == '-'))
         {
-            sscanf ((char*)program_str, "%lf %n", &cur_val, &letter_num);
+            sscanf (program_str, "%lf %n", &cur_val, &letter_num);
             array[cur_com_num] = Create_Node(NULL, NULL, NULL, cur_val, "", NUMBER);
             cur_com_num++;
-            printf ("num = %lg\n", cur_val);
+            printf ("num = %lg, let_num = %d\n", cur_val, letter_num);
+
             program_str += letter_num;
+
+            if (*(program_str - 1) == '\n')
+            {
+                array[cur_com_num] = Create_Node (NULL, NULL, NULL, 0, "\\n", END_LINE);
+                cur_com_num++;
+            }
+
         }
 
         else
@@ -58,8 +67,15 @@ printf ("sym = %c\n", *program_str);
                     array[cur_com_num] = Create_Node(NULL, NULL, NULL, Make_Hash_Str(cur_str), cur_str, VAR);
 
             }
+
             cur_com_num++;
             program_str += letter_num;
+
+            if (*(program_str - 1) == '\n')
+            {
+                array[cur_com_num] = Create_Node (NULL, NULL, NULL, 0, "\\n", END_LINE);
+                cur_com_num++;
+            }
         }
 
     }

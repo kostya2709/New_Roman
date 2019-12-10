@@ -20,14 +20,4 @@ int Make_Hash_Str (char* str);
 
 int Find_Hash (int* hash_ar, int size, int target);
 
-struct Hash
-{
-    int* oper;
-    int* var;
-    int var_amount;
-    int* k_words;
-
-    Hash();
-    ~Hash();
-    int Add_Var (int var_name);
-};
+void Back_End (Node* start, Hash* hash1);

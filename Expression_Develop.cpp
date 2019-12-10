@@ -117,7 +117,6 @@ int Tree::Make_Simple_Tree (Node* node1)
 
 int Tree::Kill_Zero (Node* node1)
 {
-printf ("OKKK\n");
     Node* kill = NULL;
     Node* live = NULL;
     int dir = 0;
@@ -204,7 +203,6 @@ printf ("OKKK\n");
 
 int Tree::Kill_One (Node* node1)
 {
-printf ("KILL ONE, p = %p\n", node1);
     Node* kill = NULL;
     Node* live = NULL;
     int dir = 0;
