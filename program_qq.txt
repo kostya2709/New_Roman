@@ -1,17 +1,38 @@
+andrew assign 10
+
+hey (hello, world, j)
 AVE_MARIA!
+andrey assign 6
+return 6
+DEUS_VULT!
+
+
+
+main()
+AVE_MARIA!
+xxx assign 10
+
+hey(andrew + 2, 20, 27)
+
+
 
 i assign 0
-Kostyaa assign 10
+Kostya assign 10
 
 suddenly 3 invades i
 AVE_MARIA!
-till_the_end
-glorious_victory:
-AVE_MARIA!
-i assign i + 1
-Kostyaa performs_in_senate
-i performs_in_senate
-DEUS_VULT!
+	
+	glorious_victory:
+		AVE_MARIA!
+		i assign i + Kostya
+		DEUS_VULT!
+
 DEUS_VULT!
 
+return 5 + Kostya
+DEUS_VULT!
+
+func()
+AVE_MARIA!
+Tasya assign 0
 DEUS_VULT!

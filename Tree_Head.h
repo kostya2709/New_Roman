@@ -105,14 +105,22 @@ private:
 
 struct Hash
 {
-    int* oper;
-    int* var;
+    int64_t* oper;
+    int64_t* k_words;
+
+    int64_t* var;
     int var_amount;
-    int* k_words;
+
+    int last_global;
+
+    int64_t* funcs;
+    int* args;
+    int funcs_num;
 
     Hash();
     ~Hash();
-    int Add_Var (int var_name);
+    int Add_Var (int64_t var_name);
+    int Add_Func (int64_t func_hash);
 };
 
 char* Delete_Str_Trash (char* str);
@@ -127,6 +135,8 @@ elem_t Find_Sol (elem_t a, int operator_t);
 Node* Tree_Copy (Node* prev_node);
 
 Node* Create_Node (Node* left, Node* right, Node* parent, elem_t data, char* sym, int node_type);
+
+Node* Create_Node (elem_t data, char* sym, int node_type);
 
 int Write_From_File (char* file_name);
 

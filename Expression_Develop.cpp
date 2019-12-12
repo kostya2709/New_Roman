@@ -103,7 +103,7 @@ int Tree::Make_Simple_Tree (Node* node1)
     if (node1->left && node1->right)
         if ((NODE_T == OPERATOR) && ((LEFT_T == NUMBER) || (RIGHT_T == NUMBER)))
         {
-            if (node1->left->data == 0 || node1->right->data == 0)
+            if (node1->left->node_type == NUMBER && node1->left->data == 0 || node1->right->node_type == NUMBER && node1->right->data == 0)
                 Kill_Zero (node1);
             else if ((node1->left->data == 1 && node1->left->node_type == NUMBER) || ((node1->right->data == 1)&&(node1->right->node_type == NUMBER)))
                 Kill_One (node1);
@@ -261,7 +261,7 @@ void Tree::Tree_Simplifier (Node* node1)
     if (node1->node_type == VAR || node1->node_type == NUMBER)
         return;
 
-    Make_Simple_Tree (node1);
+    //Make_Simple_Tree (node1);
 
     Calculate_Consts (node1);
 

@@ -11,16 +11,16 @@ var2 assign var1 + 27
 
 suddenly var1 invades var2
 begin
-glorious victory: var1 assign 5
-slight victory: 
+glorious_victory: var1 assign 5
+slight_victory: 
 begin
 var1 assign 7
 end
-grievous defeat: var2 assign 10
+grievous_defeat: var2 assign 10
 slight defeat: var1 assign 5
 var2 assign 10 var3 assign var3 + 10*var2
-equal forces: var1 assign 2
-unequal forces: var2 assign 3
+equal_forces: var1 assign 2
+unequal_forces: var2 assign 3
 end
 
 var1 invades var2

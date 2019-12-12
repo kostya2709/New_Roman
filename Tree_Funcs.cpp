@@ -43,6 +43,27 @@ int Tree::Insert_Node (Node* node1, Node* node_new, int pos)
     return 0;
 }
 
+int Insert_Node (Node* node1, Node* node_new, int pos)
+{
+    assert (node_new);
+    assert (node1);
+
+    if (pos == 0)
+        node1->left = node_new;
+    else if (pos == 1)
+        node1->right = node_new;
+    else
+    {
+        printf ("Error! Wrong position in Insert_Node\n\
+                 Expected 0 for left or 1 for right. Received %d.", pos);
+        return -1;
+    }
+
+    node_new->parent = node1;
+
+    return 0;
+}
+
 int Tree::Insert_Node (Node* node_new)
 {
     assert (node_new);
@@ -231,6 +252,10 @@ Node* Create_Node (Node* left, Node* right, Node* parent, elem_t data, char* sym
     return new_node;
 }
 
+Node* Create_Node (elem_t data, char* sym, int node_type)
+{
+    return Create_Node (NULL, NULL, NULL, data, sym, node_type);
+}
 
 int Tree_Copy_Cycle (Node* prev_node, Node* new_node);
 

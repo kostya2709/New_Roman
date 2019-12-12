@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
+#include "Front_Head.h"
 
 #ifdef Debug
 #define PRINTF printf
@@ -132,4 +133,34 @@ long Symb_Counter (char* str, char c)
         if (*str == c) counter++;
 
     return counter;
+}
+
+/*! This function replaces symbols '\n' to '\0'
+@param[in] str The pointer to a string to write it.
+@param[in] length The length of the string.
+@param[in] poem_line pointer[] The array of poem_line.
+\return The number of sublines.
+*/
+
+poem_line* StringMaker (char* str, int length, int amount)
+{
+    assert (str);
+    assert (length >= 0);
+    assert (amount >= 0);
+
+    poem_line* pointer = (poem_line*) calloc (amount, sizeof (poem_line));
+
+    pointer[0].start = str;
+    int i;
+    int counter = 0;
+    for (i = 0; i < length; i++)
+        if ((*(str + i)) == '\n')
+        {
+            *(str + i) = '\0';
+            pointer[counter].end = str + i;
+            counter++;
+            if ((i + 1) < length) pointer[counter].start = str + i + 1;
+        }
+    return pointer;
+
 }

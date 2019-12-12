@@ -18,11 +18,13 @@ enum k_words
     CLOSE_BR,
     READ,
     SUDDENLY,
-    ELSE
+    ELSE,
+    COMMA,
+    RETURN
 };
 
 
-const int K_WORDS_NUMBER = 18;
+const int K_WORDS_NUMBER = 20;
 static char* key_words_str[] =
 {
     "null",
@@ -42,7 +44,9 @@ static char* key_words_str[] =
     ")",
     "read",
     "suddenly",
-    "else:"
+    "else:",
+    ",",
+    "return"
 };
 
 
@@ -102,3 +106,5 @@ static char* oper_str[] =
     "arccos",
     "arctan",
 };
+
+static const char* MAIN = "main";

@@ -5,7 +5,14 @@
 
 static Hash hash;
 
-void Check_End_Line ();
+void Print_Info (Node* node);
+
+void Print_Funcs (void);
+
+Stack_t var_stk = {};
+Stack_t func_stk = {};
+
+void Check_End_Line (void);
 
 Node** program_node = NULL;
 
@@ -37,12 +44,30 @@ Node* Get_Link (void);
 
 Node* Get_Conditions (void);
 
-Node* Get_One_Cond ();
+Node* Get_One_Cond (void);
+
+Node* Get_Program (void);
+
+Node* Get_Dec (void);
+
+Node* Get_Global (void);
+
+Node* Get_Func_Args (int& num);
+
+Node* Get_Return (void);
+
+Node* Get_Call (void);
+
+Node* Get_Call_Args (int& num);
 
 Node* Get_General (Node** prog_node, Hash** hash1)
 {
     program_node = prog_node;
-    Node* result = Create_Node(NULL, Get_Brackets(), NULL, 27, "PROGRAM", OPERATOR);
+
+    Stack_Construct (&var_stk);
+    Stack_Construct (&func_stk);
+
+    Node* result = Create_Node(NULL, Get_Program(), NULL, 27, "PROGRAM", OPERATOR);
     if ((*program_node)->data == NULL && (*program_node)->node_type == OPERATOR)
         ;
     else
@@ -51,6 +76,10 @@ Node* Get_General (Node** prog_node, Hash** hash1)
         abort();
     }
     *hash1 = &hash;
+
+    Stack_Destruct (&var_stk);
+    Stack_Destruct (&func_stk);
+
     return result;
 }
 
@@ -67,7 +96,11 @@ Node* Get_Brackets()
 
     Check_End_Line ();
 
+    Stack_Push (&var_stk, hash.var_amount);
+
     Node* temp = Get_Link();
+
+    hash.var_amount = Stack_Pop (&var_stk);
 
     if (((*program_node)->data == END) && (*program_node)->node_type == K_WORD)
         program_node++;
@@ -97,15 +130,25 @@ Node* Get_Link ()
 
 Node* Get_Line()
 {
+
     Node* temp = *program_node;
 
     switch ((*program_node)->node_type)
     {
         case VAR:
         {
-            int var_num = Find_Hash (hash.var, hash.var_amount, (*program_node)->data);
-            if (var_num == -1)
-                var_num = hash.Add_Var ((*program_node)->data);
+            printf ("var %s, %lg\n", (*program_node)->sym, (*program_node)->data);
+
+            int var_num = Find_Hash (hash.funcs, hash.funcs_num, (*program_node)->data);
+            if (var_num != -1)
+                ;
+            else
+            {
+                var_num = Find_Hash (hash.var, hash.var_amount, (*program_node)->data);
+                if (var_num == -1)
+                    var_num = hash.Add_Var ((*program_node)->data) - 1;
+                (*program_node)->data = var_num;
+            }
 
             program_node++;
 
@@ -133,6 +176,12 @@ Node* Get_Line()
                             temp = Create_Node (temp, NULL, NULL, READ, key_words_str[READ], K_WORD);
                             break;
                         }
+                        case OPEN_BR:
+                        {
+                            temp = Get_Call();
+                            break;
+                        }
+
                     }
                     break;
                 }
@@ -149,8 +198,21 @@ Node* Get_Line()
         }
         case K_WORD:
         {
-            if ((*program_node)->data == SUDDENLY)
-                temp = Get_If();
+            switch ((int)(*program_node)->data)
+            {
+                case (SUDDENLY):
+                {
+                    temp = Get_If();
+                    break;
+                }
+                case (RETURN):
+                {
+                    temp = Get_Return();
+                }
+            }
+
+
+
         }
         break;
     }
@@ -252,12 +314,17 @@ Node* Func ()
 
 Node* Get_Str (void)
 {
+
     if ((*program_node)->node_type == OPERATOR)
                 return Func();
     else
     if ((*program_node)->node_type == VAR)
-        if (Find_Hash (hash.var, hash.var_amount, (*program_node)->data) != -1)
+    {
+        int64_t cur_hash = Make_Hash_Str ((*program_node)->sym);
+        cur_hash = Find_Hash (hash.var, hash.var_amount, cur_hash);
+        if (cur_hash != -1)
         {
+            (*program_node)->data = cur_hash;
             program_node++;
             return *(program_node - 1);
         }
@@ -266,6 +333,7 @@ Node* Get_Str (void)
             printf ("This citizen, \"%s\", was not born yet!\n", (*program_node)->sym);
             abort();
         }
+    }
 
 }
 
@@ -457,4 +525,225 @@ void Check_End_Line ()
         printf ("Expected \"\\n\" as a line terminating symbol, received \"%s\"\n", (*program_node)->sym);
         abort();
     }
+}
+
+Node* Get_Program (void)
+{
+    if (N_TYPE != VAR)
+    {
+        printf ("Expected a declaration of a function or a global variable\n");
+        printf ("Received \"%s\"\n", (*program_node)->sym);
+        exit (0);
+    }
+
+    Node* temp = NULL;
+    Node* l_node = Create_Node (NULL, NULL, NULL, LINK, "LINK", LINK);
+
+    if ((*(program_node + 1))->node_type == K_WORD
+            && (*(program_node + 1))->data == OPEN_BR)
+        temp = Get_Dec();
+    else
+        temp = Get_Global();
+
+    Insert_Node (l_node, temp, 0);
+
+    if ((*program_node)->data == NULL && (*program_node)->node_type == OPERATOR)
+        ;
+    else
+    {
+        Node* temp2 = Get_Program ();
+        Insert_Node (l_node, temp2, 1);
+    }
+
+    return l_node;
+}
+
+Node* Get_Dec()
+{
+    Node* f_node = *program_node;
+    f_node->node_type = LINK;
+
+    int64_t temp_h = Make_Hash_Str ((*program_node)->sym);
+    int pos = Find_Hash(hash.funcs, hash.funcs_num, temp_h);
+    if (pos != -1)
+    {
+        printf ("This function \"%s\" was already declared in this scope!", (*program_node)->sym);
+        exit (0);
+    }
+    hash.Add_Func (temp_h);
+
+    program_node += 2;  //Jumped over '('
+    int arg_num = 0;
+
+    if (N_TYPE == K_WORD && N_DATA == CLOSE_BR)
+        program_node++;
+    else
+    {
+        arg_num = 1;
+        Node* left = Get_Func_Args (arg_num);
+        Insert_Node (f_node, left, 0);
+    }
+
+    hash.args[hash.funcs_num - 1] = arg_num;
+
+    Check_End_Line();
+
+    Insert_Node (f_node, Get_Brackets (), 1);
+
+    return f_node;
+
+}
+
+Node* Get_Global()
+{
+    Node* l_node = Create_Node (ASSIGN, "assign", K_WORD);
+
+
+    int var_num = Find_Hash (hash.var, hash.var_amount, (*program_node)->data);
+    if (var_num == -1)
+        {
+            var_num = hash.Add_Var ((*program_node)->data) - 1;
+            hash.last_global += 1;
+        }
+    (*program_node)->data = var_num;
+    Print_Info (*program_node);
+
+    Insert_Node (l_node, *program_node, 0);
+    program_node++;
+
+    if ((N_TYPE == K_WORD) && (N_DATA == ASSIGN))
+        ;
+    else
+    {
+        printf ("Expected assignation of a global value \"%s\"\n", (*(program_node - 1))->sym);
+        printf ("Received \"%s\"\n", (*program_node)->sym);
+        exit (0);
+    }
+    program_node++;
+
+    Insert_Node (l_node, Get_Expr(), 1);
+
+    Check_End_Line();
+
+    return l_node;
+}
+
+Node* Get_Call()
+{
+    char* func_name_ptr = (*(program_node - 1))->sym;
+    int func_hash = (*(program_node - 1))->data;
+
+    Node* call = Create_Node (func_hash, "call", K_WORD);
+
+    int found = Find_Hash (hash.funcs, hash.funcs_num, func_hash);
+    if (found == -1)
+    {
+        printf ("Function \"%s\" was not declared in this scope, %lg\n", (*(program_node - 1))->sym, (*(program_node - 1))->data);
+        exit (0);
+    }
+    program_node++;
+
+    int cur_arg = 0;
+
+    if (N_TYPE == K_WORD && N_DATA == CLOSE_BR)
+        program_node++;
+    else
+        {
+            Insert_Node (call, Get_Call_Args (cur_arg), 0);
+        }
+
+    if (cur_arg != hash.args[found])
+    {
+        printf ("Invalid number of arguments in function \"%s\".\n", func_name_ptr);
+        printf ("Expected %d arguments, received %d arguments.\n", hash.args[found]);
+        exit (0);
+    }
+
+    return call;
+}
+
+Node* Get_Call_Args (int& args_num)
+{
+    Node* link = Create_Node (LINK, "LINK", LINK);
+    Node* arg = Get_Expr();
+    Insert_Node (link, arg, 0);
+    args_num++;
+
+    if (N_TYPE == K_WORD && N_DATA == CLOSE_BR)
+    {
+        program_node++;
+        return link;
+    }
+    else if (N_TYPE == K_WORD && N_DATA == COMMA)
+    {
+        program_node++;
+        Insert_Node (link, Get_Call_Args (args_num), 1);
+        return link;
+    }
+    else
+    {
+        printf ("Expected \",\" to enumerate arguments or \")\"to finish argument enumeration.\n");
+        printf ("Received \"%s\".\n", (*program_node)->sym);
+        exit (0);
+    }
+}
+
+Node* Get_Func_Args(int& num)
+{
+    Node* l_node = Create_Node (LINK, "LINK", LINK);
+
+    if (N_TYPE == VAR)
+        ;
+    else
+    {
+        printf ("Expected an argument in function declaration.\n");
+        printf ("Received \"%s\"\n", (*program_node)->sym);
+        exit (0);
+    }
+
+    Insert_Node (l_node, *program_node, 0);
+    program_node++;
+
+    if (N_DATA == COMMA && N_TYPE == K_WORD)
+    {
+        num += 1;
+        program_node++;
+        Insert_Node (l_node, Get_Func_Args (num), 1);
+        program_node--;
+    }
+    if (N_DATA == CLOSE_BR && N_TYPE == K_WORD)
+    {
+        program_node++;
+        return l_node;
+    }
+    else
+    {
+        printf ("Expected an argument or a closing bracket in function declaration.\n");
+        printf ("Received \"%s\"\n", (*program_node)->sym);
+        exit (0);
+    }
+}
+
+Node* Get_Return ()
+{
+    Node* temp = (*program_node);
+    program_node++;
+
+    Node* expr = Get_Expr();
+    Insert_Node(temp, expr, 0);
+
+    return temp;
+}
+
+void Print_Funcs (void)
+{
+    printf ("there are %d funcs\n", hash.funcs_num);
+    for (int i = 0; i < hash.funcs_num; i++)
+        printf ("%d %d args %d\n", i, hash.funcs[i], hash.args[i]);
+    return;
+}
+
+void Print_Info (Node* node)
+{
+    printf ("\ndata = %lg\nsym = \"%s\"\ntype=\"%d\"\nhash=\"%d\"\n\n", node->data, node->sym, node->node_type, Make_Hash_Str((*program_node)->sym));
 }

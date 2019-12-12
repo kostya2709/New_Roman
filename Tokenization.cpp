@@ -2,31 +2,40 @@
 
 
 
-Node** Tokenization (const char* program_str, int& com_num)
+Node** Tokenization (const poem_line* pointer, int num_lines, int& com_num)
 {
     Hash hash;
 
-    Node** array = (Node**)calloc (sizeof (Node*), MAX_VAR_NAME);
+    Node** array = (Node**)calloc (sizeof (Node*), MAX_WORD_NUM);
     int cur_com_num = 0;
 
+    char* program_str = pointer[0].start;
     char cur_sym = *program_str;
     double cur_val = 0;
     int letter_num = 0;
     char* cur_str = (char*)calloc (1, MAX_VAR_NAME);
+    int i = 0;
 
-    printf ("stroka = %s\n", program_str);
 
-    while (*program_str)
+    for (i = 0; i < num_lines; i++)
     {
+        program_str = pointer[i].start;
         cur_sym = *program_str;
-printf ("sym = %c\n", *program_str);
 
-        if (cur_sym == ' ' || cur_sym == '\t')
+
+        while (cur_sym == ' ' || cur_sym == '\t')
         {
             program_str++;
-            printf ("SPACE\n");
-            continue;
+            cur_sym = *program_str;
         }
+
+        if (cur_sym == '\0')
+            continue;
+
+
+        while (program_str < pointer[i].end)
+        {
+            cur_sym = *program_str;
 
         if (isdigit (cur_sym) || (cur_sym == '-'))
         {
@@ -36,12 +45,6 @@ printf ("sym = %c\n", *program_str);
             printf ("num = %lg, let_num = %d\n", cur_val, letter_num);
 
             program_str += letter_num;
-
-            if (*(program_str - 1) == '\n')
-            {
-                array[cur_com_num] = Create_Node (NULL, NULL, NULL, 0, "\\n", END_LINE);
-                cur_com_num++;
-            }
 
         }
 
@@ -70,14 +73,10 @@ printf ("sym = %c\n", *program_str);
 
             cur_com_num++;
             program_str += letter_num;
-
-            if (*(program_str - 1) == '\n')
-            {
-                array[cur_com_num] = Create_Node (NULL, NULL, NULL, 0, "\\n", END_LINE);
-                cur_com_num++;
-            }
         }
-
+        }
+        array[cur_com_num] = Create_Node (NULL, NULL, NULL, END_LINE, "\n", END_LINE);
+        cur_com_num++;
     }
 
     array[cur_com_num] = Create_Node (NULL, NULL, NULL, NULL, "", OPERATOR);

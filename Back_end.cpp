@@ -2,11 +2,14 @@
 
 void Back_End_Cycle(Node* start);
 
+void Push_Func (Node* start);
+
 char* file_asm = "Test_Lang.txt";
 
 FILE* f;
 
 Hash* hash;
+
 
 int comp = 0;
 int cond = 0;
@@ -47,19 +50,19 @@ void Push_Expr (Node* start)
             }
         }
         else if (start->node_type == VAR)
-            fprintf (f, "push [%d]\n", Find_Hash(hash->var, hash->var_amount, start->data));
+            fprintf (f, "push [%lg]\n", start->data);
 }
 
 void Push_Print (Node* start)
 {
-    int var = Find_Hash(hash->var, hash->var_amount, start->left->data);
+    int var = start->left->data;
     fprintf (f, "push [%d]\n", var);
     fprintf (f, "out\n");
 }
 
 void Push_Read (Node* start)
 {
-    int var = Find_Hash(hash->var, hash->var_amount, start->left->data);
+    int var = start->left->data;
     fprintf (f, "in\n");
     fprintf (f, "pop [%d]\n", var);
 }
@@ -128,7 +131,7 @@ void Push_One_Cond (Node* start, Node* left, Node* right)
         fprintf (f, "comp%d_cond%d:\n", comp, cond);
     }
 
-    Back_End_Cycle (start->left);
+    Push_Func (start->left);
 
     if (in_while)
         fprintf (f, "jmp while_comp%d_back:\n", comp);
@@ -163,15 +166,29 @@ void Push_Invade (Node* start)
 
 void Push_Assign (Node* start)
 {
-    int var_num = Find_Hash(hash->var, hash->var_amount, start->left->data);
+    int var_num = start->left->data;
 
     Push_Expr(start->right);
 
     fprintf (f, "pop [%d]\n", var_num);
 }
 
-void Back_End_Cycle(Node* start)
+void Push_Func_Args (Node* start)
 {
+
+}
+
+void Push_Return (Node* start)
+{
+    Push_Expr (start->left);
+    fprintf (f, "ret\n\n");
+}
+
+void Push_Func (Node* start)
+{
+    if (start->left == 0)
+        return;
+
     switch ((int)(start->left->data))
     {
         case ASSIGN:
@@ -194,6 +211,49 @@ void Back_End_Cycle(Node* start)
             Push_Invade (start->left);
             break;
         }
+        case RETURN:
+        {
+            Push_Return (start->left);
+            break;
+        }
+    }
+
+    fprintf (f, "\n");
+
+    if (start->right)
+        Push_Func (start->right);
+
+}
+
+void Push_Func_Up (Node* start)
+{
+
+    fprintf (f, "%s:\n", start->sym);
+
+    if (start->left) printf ("ARR\n");
+        //Push_Func_Args (start->left);
+
+    if (start->right)
+    {
+        Push_Func (start->right);
+    }
+
+}
+
+void Back_End_Cycle (Node* start)
+{
+    switch ((int)(start->left->node_type))
+    {
+        case K_WORD:                    // Global assignation
+        {
+            Push_Assign (start->left);
+            break;
+        }
+        case LINK:                      // Function declaration
+        {
+            Push_Func_Up (start->left);
+            break;
+        }
     }
 
     fprintf (f, "\n");
@@ -202,13 +262,18 @@ void Back_End_Cycle(Node* start)
         Back_End_Cycle (start->right);
 }
 
+
 void Back_End (Node* start, Hash* hash1)
 {
     f = fopen (file_asm, "w");
     hash = hash1;
+    fprintf (f, "call %s:\n", MAIN);
+    int randd = rand()%100000 + 100000;
+    fprintf (f, "jmp end%d:\n\n\n", randd);
 
     Back_End_Cycle (start->right);
 
+    fprintf (f, "end%d:\n", randd);
     fprintf (f, "end");
 
     fclose (f);

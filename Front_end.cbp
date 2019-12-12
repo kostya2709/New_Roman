@@ -38,6 +38,7 @@
 		<Unit filename="Front_Head.h" />
 		<Unit filename="Hash.cpp" />
 		<Unit filename="Recursive_Descend.cpp" />
+		<Unit filename="Stack_Dyn_Func.cpp" />
 		<Unit filename="Tokenization.cpp" />
 		<Unit filename="Tree_Funcs.cpp" />
 		<Unit filename="Tree_Head.h" />
