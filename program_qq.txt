@@ -1,38 +1,28 @@
-andrew assign 10
-
-hey (hello, world, j)
+Галльская_Война (Цезарь)
 AVE_MARIA!
-andrey assign 6
-return 6
+
+галлы имеет_силу 0
+
+Вдруг Цезарь нападает_на галлы
+AVE_MARIA!
+	Поражение: В_Рим_возвращается 1
+DEUS_VULT!
+
+В_Рим_возвращается Цезарь * Галльская_Война (Цезарь - 1)
 DEUS_VULT!
 
 
-
-main()
+РИМ()
 AVE_MARIA!
-xxx assign 10
 
-hey(andrew + 2, 20, 27)
+Цезарь познает_волю_богов
 
+гонец имеет_силу Галльская_Война (Цезарь)
 
+Объявить_плебеям "\nСила Цезаря "
 
-i assign 0
-Kostya assign 10
+гонец выступает_в_сенате
 
-suddenly 3 invades i
-AVE_MARIA!
-	
-	glorious_victory:
-		AVE_MARIA!
-		i assign i + Kostya
-		DEUS_VULT!
+В_Рим_возвращается 0
 
-DEUS_VULT!
-
-return 5 + Kostya
-DEUS_VULT!
-
-func()
-AVE_MARIA!
-Tasya assign 0
 DEUS_VULT!

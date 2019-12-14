@@ -2,56 +2,40 @@ call main:
 jmp end189383:
 
 
-push 10
+push 5
 pop [0]
 
-hey:
-push 6
-pop [1]
+func:
+pop [32]
 
-push 6
-ret
-
+push [32]
+out
 
 
 main:
-push 10
-pop [1]
-
-
-push 0
-pop [2]
-
-push 10
-pop [3]
-
-push 3
-push [2]
-ja comp0_cond0:
-jmp comp0_cond0_else:
-comp0_cond0:
-push [2]
-push [3]
-add
-pop [2]
-
-jmp comp0_out:
-comp0_cond0_else:
-
-comp0_out:
-
-
 
 push 5
-push [3]
+call func:
+
+
+in
+pop [96]
+
+push [96]
+push 5
+push [96]
+mul
 add
+push [96]
+add
+pop [97]
+
+push [97]
+out
+
+push 0
 ret
 
-
-
-func:
-push 0
-pop [1]
 
 
 end189383:

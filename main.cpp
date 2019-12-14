@@ -6,8 +6,7 @@
 
 int main()
 {
-
-    setlocale (LC_ALL, "RUS");
+    setlocale (LC_ALL, "Russian");
 
     long int program_size = 0;
     long int num_lines = 0;

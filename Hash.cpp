@@ -36,6 +36,26 @@ int Find_Hash (int64_t* hash_ar, int size, int64_t target)
     return answer;
 }
 
+int Find_Hash (int64_t* hash_ar, int min, int max, int64_t target, int last_global)
+{
+    int answer = -1;
+
+    for (int i = 0; i < last_global; i++)
+        if (hash_ar[i] == target)
+        {
+            answer = i;
+            return answer;
+        }
+
+    for (int i = min; i < max; i++)
+        if (hash_ar[i] == target)
+        {
+            answer = i;
+            break;
+        }
+    return answer;
+}
+
 Hash::Hash()
 {
     this->k_words = Make_Hash_Array ((char**)key_words_str, K_WORDS_NUMBER);

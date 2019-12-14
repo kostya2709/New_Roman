@@ -22,7 +22,7 @@ const int FILE_SIZE = 256;
 
 const int FILE_NAME_SIZE = 32;
 
-const int operator_size = 6;
+const int operator_size = 128;
 
 
 struct Node

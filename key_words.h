@@ -20,33 +20,35 @@ enum k_words
     SUDDENLY,
     ELSE,
     COMMA,
-    RETURN
+    RETURN,
+    WRITE
 };
 
 
-const int K_WORDS_NUMBER = 20;
+const int K_WORDS_NUMBER = 21;
 static char* key_words_str[] =
 {
     "null",
-    "invades",
-    "till_the_end",
+    "нападает_на",
+    "Бой_до_последней_капли_крови",
     "AVE_MARIA!",
     "DEUS_VULT!",
-    "glorious_victory:",
-    "slight_victory:",
-    "grievous_defeat:",
-    "slight_defeat:",
-    "equal_forces:",
-    "unequal_forces:",
-    "assign",
-    "performs_in_senate",
+    "Славная_победа:",
+    "Победа:",
+    "Горькое_поражение:",
+    "Поражение:",
+    "Равные_силы:",
+    "Неравные_силы:",
+    "имеет_силу",
+    "выступает_в_сенате",
     "(",
     ")",
-    "read",
-    "suddenly",
-    "else:",
+    "познает_волю_богов",
+    "Вдруг",
+    "Если_нет:",
     ",",
-    "return"
+    "В_Рим_возвращается",
+    "Объявить_плебеям"
 };
 
 
@@ -56,7 +58,9 @@ enum node_types {
                         VAR,
                         K_WORD,
                         LINK,
-                        END_LINE
+                        END_LINE,
+                        CALL,
+                        STRING
                 };
 
 enum operator_num   {
@@ -107,4 +111,4 @@ static char* oper_str[] =
     "arctan",
 };
 
-static const char* MAIN = "main";
+static const char* MAIN = "РИМ";

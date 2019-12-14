@@ -29,15 +29,29 @@ Node** Tokenization (const poem_line* pointer, int num_lines, int& com_num)
             cur_sym = *program_str;
         }
 
+        char* start_str = program_str;
+
         if (cur_sym == '\0')
             continue;
 
+        int no_com = 1;
 
         while (program_str < pointer[i].end)
         {
+            if (*program_str == '/' && *(program_str + 1) == '/')
+                if (program_str == start_str)
+                {
+                    no_com = 0;
+                    break;
+                }
+                else
+                {
+                    break;
+                }
+
             cur_sym = *program_str;
 
-        if (isdigit (cur_sym) || (cur_sym == '-'))
+        if (isdigit (cur_sym)/* || (cur_sym == '-')*/)
         {
             sscanf (program_str, "%lf %n", &cur_val, &letter_num);
             array[cur_com_num] = Create_Node(NULL, NULL, NULL, cur_val, "", NUMBER);
@@ -50,11 +64,20 @@ Node** Tokenization (const poem_line* pointer, int num_lines, int& com_num)
 
         else
         {
-            if (isalpha (cur_sym))
-                sscanf ((char*)program_str, "%[^ ,\n,\t,+,-,*,/,^,(,),#, 0] %n", cur_str, &letter_num);
-
+            if (!Is_Symb (cur_sym))
+                sscanf ((char*)program_str, "%[^ ,^\n,^\t,^+,^-,^*,^/,^^,^(,^), ^\"] %n", cur_str, &letter_num);
             else
-                sscanf ((char*)program_str, "%1s %n", cur_str, &letter_num);
+                if (*program_str == '\"')
+                {
+                    program_str++;
+                    sscanf (program_str, "%[^\"]", cur_str);
+                    printf ("cur_str_str = \"%s\"\n", cur_str);
+                    array [cur_com_num] = Create_Node (NULL, cur_str, STRING);
+                    cur_com_num++;
+                    break;
+                }
+                else
+                    sscanf ((char*)program_str, "%1s %n", cur_str, &letter_num);
 
             printf ("cur_str = \"%s\", num = %d\n", cur_str, letter_num);
 
@@ -75,8 +98,11 @@ Node** Tokenization (const poem_line* pointer, int num_lines, int& com_num)
             program_str += letter_num;
         }
         }
-        array[cur_com_num] = Create_Node (NULL, NULL, NULL, END_LINE, "\n", END_LINE);
-        cur_com_num++;
+        if (no_com)
+        {
+            array[cur_com_num] = Create_Node (NULL, NULL, NULL, END_LINE, "\n", END_LINE);
+            cur_com_num++;
+        }
     }
 
     array[cur_com_num] = Create_Node (NULL, NULL, NULL, NULL, "", OPERATOR);

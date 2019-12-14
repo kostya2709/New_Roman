@@ -170,7 +170,7 @@ else if (node->node_type == VAR)   \
 
 
     #undef DEF_COLOR
-    free (color);
+    //free (color);
 
 }
 
@@ -227,7 +227,7 @@ else if (node->node_type == VAR)   \
 
 
     #undef DEF_COLOR
-    free (color);
+    //free (color);
 
 }
 

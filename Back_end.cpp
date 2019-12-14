@@ -2,9 +2,13 @@
 
 void Back_End_Cycle(Node* start);
 
+void Push_Call_Func (Node* start);
+
 void Push_Func (Node* start);
 
-char* file_asm = "Test_Lang.txt";
+void Call_Func (Node* start);
+
+char* file_asm = "../../ASSSembler/asm_progs/Lang/Lang.txt";
 
 FILE* f;
 
@@ -17,10 +21,15 @@ int cond = 0;
 void Push_Expr (Node* start)
 {
     if (start->left)
-        Push_Expr (start->left);
+        if (start->node_type != CALL)
+            Push_Expr (start->left);
 
     if (start->right)
-        Push_Expr (start->right);
+        if (start->node_type != CALL)
+            Push_Expr (start->right);
+
+    if (start->node_type == CALL)
+        Push_Call_Func (start);
 
     if (start->node_type == NUMBER)
         fprintf (f, "push %lg\n", start->data);
@@ -50,13 +59,13 @@ void Push_Expr (Node* start)
             }
         }
         else if (start->node_type == VAR)
-            fprintf (f, "push [%lg]\n", start->data);
+            fprintf (f, "push [ax+%lg]\n", start->data);
 }
 
 void Push_Print (Node* start)
 {
     int var = start->left->data;
-    fprintf (f, "push [%d]\n", var);
+    fprintf (f, "push [ax+%d]\n", var);
     fprintf (f, "out\n");
 }
 
@@ -64,7 +73,7 @@ void Push_Read (Node* start)
 {
     int var = start->left->data;
     fprintf (f, "in\n");
-    fprintf (f, "pop [%d]\n", var);
+    fprintf (f, "pop [ax+%d]\n", var);
 }
 
 void Push_One_Cond (Node* start, Node* left, Node* right)
@@ -103,7 +112,7 @@ void Push_One_Cond (Node* start, Node* left, Node* right)
         }
         case ELESS:
         {
-            fprintf (f, "jel ");
+            fprintf (f, "jle ");
             break;
         }
         case EQUAL:
@@ -170,18 +179,41 @@ void Push_Assign (Node* start)
 
     Push_Expr(start->right);
 
-    fprintf (f, "pop [%d]\n", var_num);
-}
-
-void Push_Func_Args (Node* start)
-{
-
+    fprintf (f, "pop [ax+%d]\n", var_num);
 }
 
 void Push_Return (Node* start)
 {
     Push_Expr (start->left);
+    fprintf (f, "\npush ax\n");
+    fprintf (f, "push %d\n", MAX_VAR_IN_FUNC);
+    fprintf (f, "min\n");
+    fprintf (f, "pop ax\n");
     fprintf (f, "ret\n\n");
+}
+
+void Push_Call_Args (Node* start)
+{
+    Push_Expr (start->left);
+    if (start->right)
+        Push_Call_Args (start->right);
+}
+
+void Push_Call_Func (Node* start)
+{
+
+    char* func = start->sym;
+
+    if (start->left)
+        Push_Call_Args (start->left);
+
+    fprintf (f, "push ax\n");
+    fprintf (f, "push %d\n", MAX_VAR_IN_FUNC);
+    fprintf (f, "add\n");
+    fprintf (f, "pop ax\n");
+
+    fprintf (f, "call %s:\n\n", func);
+
 }
 
 void Push_Func (Node* start)
@@ -189,6 +221,9 @@ void Push_Func (Node* start)
     if (start->left == 0)
         return;
 
+    if (start->left->node_type == CALL)
+        Push_Call_Func (start->left);
+    else
     switch ((int)(start->left->data))
     {
         case ASSIGN:
@@ -216,6 +251,10 @@ void Push_Func (Node* start)
             Push_Return (start->left);
             break;
         }
+        case WRITE:
+        {
+            fprintf (f, "\noutf \"%s\"\n\n", start->left->left->sym);
+        }
     }
 
     fprintf (f, "\n");
@@ -225,13 +264,23 @@ void Push_Func (Node* start)
 
 }
 
+void Push_Func_Args (Node* start)
+{
+    if (start->right)
+        Push_Func_Args (start->right);
+
+    fprintf (f, "pop [ax+%d]\n", (int)start->left->data);
+}
+
 void Push_Func_Up (Node* start)
 {
 
     fprintf (f, "%s:\n", start->sym);
 
-    if (start->left) printf ("ARR\n");
-        //Push_Func_Args (start->left);
+    if (start->left)
+        Push_Func_Args (start->left);
+
+    fprintf (f, "\n");
 
     if (start->right)
     {
@@ -267,6 +316,7 @@ void Back_End (Node* start, Hash* hash1)
 {
     f = fopen (file_asm, "w");
     hash = hash1;
+
     fprintf (f, "call %s:\n", MAIN);
     int randd = rand()%100000 + 100000;
     fprintf (f, "jmp end%d:\n\n\n", randd);
@@ -277,4 +327,19 @@ void Back_End (Node* start, Hash* hash1)
     fprintf (f, "end");
 
     fclose (f);
+}
+
+bool Is_Symb (char a)
+{
+    switch (a)
+    {
+    case '`':   case '#':   case '^':   case '(':   case '=':   case '<':   case '\\':
+    case '~':   case '№':   case ':':   case ')':   case '{':   case '>':   case '|':
+    case '!':   case '$':   case '&':   case '-':   case '}':   case ',':
+    case '@':   case ';':   case '?':   case '_':   case '[':   case '.':
+    case '\"':   case '%':   case '*':   case '+':   case ']':   case '/':
+
+    return 1;
+    }
+    return 0;
 }

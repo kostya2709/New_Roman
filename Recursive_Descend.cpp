@@ -5,12 +5,19 @@
 
 static Hash hash;
 
+int min_var = 0;
+
+int func_counter = 0;
+
+int cur_arg_num = 0;
+
 void Print_Info (Node* node);
+
+void Print_Vars (void);
 
 void Print_Funcs (void);
 
 Stack_t var_stk = {};
-Stack_t func_stk = {};
 
 void Check_End_Line (void);
 
@@ -36,11 +43,11 @@ Node* Func (char* oper);
 
 Node* Get_Str (void);
 
-Node* Get_Brackets(void);
+Node* Get_Brackets ();
 
-Node* Get_Line (void);
+Node* Get_Line ();
 
-Node* Get_Link (void);
+Node* Get_Link ();
 
 Node* Get_Conditions (void);
 
@@ -58,6 +65,8 @@ Node* Get_Return (void);
 
 Node* Get_Call (void);
 
+Node* Get_String (void);
+
 Node* Get_Call_Args (int& num);
 
 Node* Get_General (Node** prog_node, Hash** hash1)
@@ -65,7 +74,6 @@ Node* Get_General (Node** prog_node, Hash** hash1)
     program_node = prog_node;
 
     Stack_Construct (&var_stk);
-    Stack_Construct (&func_stk);
 
     Node* result = Create_Node(NULL, Get_Program(), NULL, 27, "PROGRAM", OPERATOR);
     if ((*program_node)->data == NULL && (*program_node)->node_type == OPERATOR)
@@ -78,12 +86,11 @@ Node* Get_General (Node** prog_node, Hash** hash1)
     *hash1 = &hash;
 
     Stack_Destruct (&var_stk);
-    Stack_Destruct (&func_stk);
 
     return result;
 }
 
-Node* Get_Brackets()
+Node* Get_Brackets ()
 {
 
     if (((*program_node)->data == BEGIN) && (*program_node)->node_type == K_WORD)
@@ -98,7 +105,7 @@ Node* Get_Brackets()
 
     Stack_Push (&var_stk, hash.var_amount);
 
-    Node* temp = Get_Link();
+    Node* temp = Get_Link ();
 
     hash.var_amount = Stack_Pop (&var_stk);
 
@@ -121,14 +128,14 @@ Node* Get_Brackets()
 
 Node* Get_Link ()
 {
-    Node* left = Get_Line();
+    Node* left = Get_Line ();
     if ((*program_node)->data == END && (*program_node)->node_type == K_WORD)
         return Create_Node (left, NULL, NULL, LINK, "LINK", LINK);
     else
         return Create_Node (left, Get_Link(), NULL, LINK, "LINK", LINK);
 }
 
-Node* Get_Line()
+Node* Get_Line ()
 {
 
     Node* temp = *program_node;
@@ -139,15 +146,18 @@ Node* Get_Line()
         {
             printf ("var %s, %lg\n", (*program_node)->sym, (*program_node)->data);
 
-            int var_num = Find_Hash (hash.funcs, hash.funcs_num, (*program_node)->data);
+            int64_t var_num = Find_Hash (hash.funcs, hash.funcs_num, (*program_node)->data);
             if (var_num != -1)
                 ;
             else
-            {
+            {   printf ("OK, %s\n", (*program_node)->sym);
                 var_num = Find_Hash (hash.var, hash.var_amount, (*program_node)->data);
                 if (var_num == -1)
                     var_num = hash.Add_Var ((*program_node)->data) - 1;
-                (*program_node)->data = var_num;
+                if (var_num < hash.last_global)
+                    (*program_node)->data = var_num;
+                else
+                    (*program_node)->data = var_num - hash.last_global;
             }
 
             program_node++;
@@ -161,7 +171,7 @@ Node* Get_Line()
                         case ASSIGN:
                         {
                             program_node++;
-                            temp = Create_Node (temp, Get_Expr(), NULL, ASSIGN, key_words_str[ASSIGN], K_WORD);
+                            temp = Create_Node (temp, Get_Expr (), NULL, ASSIGN, key_words_str[ASSIGN], K_WORD);
                             break;
                         }
                         case PRINT:
@@ -208,6 +218,12 @@ Node* Get_Line()
                 case (RETURN):
                 {
                     temp = Get_Return();
+                    break;
+                }
+                case (WRITE):
+                {
+                    temp = Get_String();
+                    break;
                 }
             }
 
@@ -284,7 +300,7 @@ Node* Get_Pbrack (void)
     else if ((*program_node)->node_type == NUMBER)
         return Get_Number();
     else
-        Get_Str();
+        return Get_Str();
 
 }
 
@@ -315,16 +331,29 @@ Node* Func ()
 Node* Get_Str (void)
 {
 
+    Print_Vars ();
+    printf ("var %s\n", (*program_node)->sym);
+
     if ((*program_node)->node_type == OPERATOR)
                 return Func();
     else
     if ((*program_node)->node_type == VAR)
     {
+        int64_t var_num = Find_Hash (hash.funcs, hash.funcs_num, (*program_node)->data);
+        if (var_num != -1)
+        {
+            program_node++;
+            return Get_Call();
+        }
+
         int64_t cur_hash = Make_Hash_Str ((*program_node)->sym);
         cur_hash = Find_Hash (hash.var, hash.var_amount, cur_hash);
         if (cur_hash != -1)
         {
-            (*program_node)->data = cur_hash;
+            if (cur_hash < hash.last_global)
+                (*program_node)->data = cur_hash;
+            else
+                (*program_node)->data = cur_hash - hash.last_global;
             program_node++;
             return *(program_node - 1);
         }
@@ -541,7 +570,11 @@ Node* Get_Program (void)
 
     if ((*(program_node + 1))->node_type == K_WORD
             && (*(program_node + 1))->data == OPEN_BR)
+    {
         temp = Get_Dec();
+        func_counter++;
+        hash.var_amount = hash.last_global;
+    }
     else
         temp = Get_Global();
 
@@ -564,7 +597,7 @@ Node* Get_Dec()
     f_node->node_type = LINK;
 
     int64_t temp_h = Make_Hash_Str ((*program_node)->sym);
-    int pos = Find_Hash(hash.funcs, hash.funcs_num, temp_h);
+    int64_t pos = Find_Hash (hash.funcs, hash.funcs_num, temp_h);
     if (pos != -1)
     {
         printf ("This function \"%s\" was already declared in this scope!", (*program_node)->sym);
@@ -586,6 +619,8 @@ Node* Get_Dec()
 
     hash.args[hash.funcs_num - 1] = arg_num;
 
+    cur_arg_num = 0;
+
     Check_End_Line();
 
     Insert_Node (f_node, Get_Brackets (), 1);
@@ -599,7 +634,7 @@ Node* Get_Global()
     Node* l_node = Create_Node (ASSIGN, "assign", K_WORD);
 
 
-    int var_num = Find_Hash (hash.var, hash.var_amount, (*program_node)->data);
+    int64_t var_num = Find_Hash (hash.var, hash.var_amount, (*program_node)->data);
     if (var_num == -1)
         {
             var_num = hash.Add_Var ((*program_node)->data) - 1;
@@ -631,14 +666,16 @@ Node* Get_Global()
 Node* Get_Call()
 {
     char* func_name_ptr = (*(program_node - 1))->sym;
-    int func_hash = (*(program_node - 1))->data;
+    int64_t func_hash = (*(program_node - 1))->data;
+    int min_var = hash.var_amount;
 
-    Node* call = Create_Node (func_hash, "call", K_WORD);
+    Node* call = Create_Node (min_var, (*(program_node - 1))->sym, CALL);
 
-    int found = Find_Hash (hash.funcs, hash.funcs_num, func_hash);
+    int64_t found = Find_Hash (hash.funcs, hash.funcs_num, func_hash);
     if (found == -1)
     {
         printf ("Function \"%s\" was not declared in this scope, %lg\n", (*(program_node - 1))->sym, (*(program_node - 1))->data);
+        Print_Funcs();
         exit (0);
     }
     program_node++;
@@ -701,6 +738,21 @@ Node* Get_Func_Args(int& num)
         exit (0);
     }
 
+    int64_t cur_hash = Make_Hash_Str ((*program_node)->sym);
+    cur_hash = Find_Hash (hash.var, hash.var_amount, cur_hash);
+    if (cur_hash != -1)
+    {
+        printf ("Name of a global variable and names of function arguments cannot coincide!\n");
+        printf ("In declaration received \"%s\".\n", (*program_node)->sym);
+        exit (0);
+    }
+        else
+        {
+            (*program_node)->data = cur_arg_num;
+            hash.Add_Var (Make_Hash_Str ((*program_node)->sym));
+            cur_arg_num++;
+        }
+
     Insert_Node (l_node, *program_node, 0);
     program_node++;
 
@@ -726,6 +778,7 @@ Node* Get_Func_Args(int& num)
 
 Node* Get_Return ()
 {
+printf ("IN RETURN %s\n", (*program_node)->sym);
     Node* temp = (*program_node);
     program_node++;
 
@@ -739,11 +792,35 @@ void Print_Funcs (void)
 {
     printf ("there are %d funcs\n", hash.funcs_num);
     for (int i = 0; i < hash.funcs_num; i++)
-        printf ("%d %d args %d\n", i, hash.funcs[i], hash.args[i]);
+        printf ("%d %lld args %d\n", i, hash.funcs[i], hash.args[i]);
     return;
 }
 
 void Print_Info (Node* node)
 {
-    printf ("\ndata = %lg\nsym = \"%s\"\ntype=\"%d\"\nhash=\"%d\"\n\n", node->data, node->sym, node->node_type, Make_Hash_Str((*program_node)->sym));
+    printf ("\ndata = %lg\nsym = \"%s\"\ntype=\"%d\"\nhash=\"%lld\"\n\n", node->data, node->sym, node->node_type, Make_Hash_Str((*program_node)->sym));
+}
+
+void Print_Vars (void)
+{
+    for (int i = 0; i < hash.var_amount; i++)
+        printf ("%d %lld\n", i, hash.var[i]);
+}
+
+Node* Get_String ()
+{
+    Node* n_write = *program_node;
+    program_node++;
+
+    if ((*program_node)->node_type != STRING)
+    {
+        printf ("Expected a string after \"%s\".\n", (*(program_node - 1))->sym);
+        printf ("Received \"%s\"\n", (*program_node)->sym);
+        exit (0);
+    }
+
+    Insert_Node (n_write, *program_node, 0);
+    program_node++;
+
+    return n_write;
 }

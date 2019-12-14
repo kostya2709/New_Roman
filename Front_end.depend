@@ -11,21 +11,21 @@
 
 1575639223 source:/home/kostya/progs/New_Roman_Language/Front_end/Tokenesation.cpp
 
-1576189319 source:/home/kostya/progs/New_Roman_Language/Front_end/main.cpp
+1576260369 source:/home/kostya/progs/New_Roman_Language/Front_end/main.cpp
 	<stdio.h>
 	<stdlib.h>
 	"Front_Head.h"
 
-1576165905 /home/kostya/progs/New_Roman_Language/Front_end/Front_Head.h
+1576259191 /home/kostya/progs/New_Roman_Language/Front_end/Front_Head.h
 	<stdio.h>
 	<stdlib.h>
 	<math.h>
 	"Tree_Head.h"
 
-1576103172 source:/home/kostya/progs/New_Roman_Language/Front_end/Tokenization.cpp
+1576251401 source:/home/kostya/progs/New_Roman_Language/Front_end/Tokenization.cpp
 	"Front_Head.h"
 
-1576165907 /home/kostya/progs/New_Roman_Language/Front_end/Tree_Head.h
+1576259285 /home/kostya/progs/New_Roman_Language/Front_end/Tree_Head.h
 	<stdlib.h>
 	<stdio.h>
 	<string.h>
@@ -37,22 +37,22 @@
 	<stdarg.h>
 	"key_words.h"
 
-1576103344 source:/home/kostya/progs/New_Roman_Language/Front_end/Tree_Funcs.cpp
+1576252972 source:/home/kostya/progs/New_Roman_Language/Front_end/Tree_Funcs.cpp
 	"Front_Head.h"
 
-1576144211 /home/kostya/progs/New_Roman_Language/Front_end/key_words.h
+1576262798 /home/kostya/progs/New_Roman_Language/Front_end/key_words.h
 
-1576179177 source:/home/kostya/progs/New_Roman_Language/Front_end/Hash.cpp
+1576242446 source:/home/kostya/progs/New_Roman_Language/Front_end/Hash.cpp
 	"Front_Head.h"
 	<stdint.h>
 
-1576189410 source:/home/kostya/progs/New_Roman_Language/Front_end/Recursive_Descend.cpp
+1576264780 source:/home/kostya/progs/New_Roman_Language/Front_end/Recursive_Descend.cpp
 	"Front_Head.h"
 
 1576189849 source:/home/kostya/progs/New_Roman_Language/Front_end/Expression_Develop.cpp
 	"Front_Head.h"
 
-1576145680 source:/home/kostya/progs/New_Roman_Language/Front_end/Back_end.cpp
+1576269959 source:/home/kostya/progs/New_Roman_Language/Front_end/Back_end.cpp
 	"Front_Head.h"
 
 1576023842 /home/kostya/progs/New_Roman_Language/Front_end/Stack_Dyn_Head.h
