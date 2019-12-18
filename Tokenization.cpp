@@ -65,7 +65,7 @@ Node** Tokenization (const poem_line* pointer, int num_lines, int& com_num)
         else
         {
             if (!Is_Symb (cur_sym))
-                sscanf ((char*)program_str, "%[^ ,^\n,^\t,^+,^-,^*,^/,^^,^(,^), ^\"] %n", cur_str, &letter_num);
+                sscanf ((char*)program_str, "%[^ ,\n\t+-*()\"] %n", cur_str, &letter_num);
             else
                 if (*program_str == '\"')
                 {
@@ -77,13 +77,24 @@ Node** Tokenization (const poem_line* pointer, int num_lines, int& com_num)
                     break;
                 }
                 else
+                {
                     sscanf ((char*)program_str, "%1s %n", cur_str, &letter_num);
+                    if (strcmp (cur_str, "-")== 0 && array[cur_com_num - 1]->node_type == K_WORD)
+                    {
+                        array[cur_com_num] = Create_Node(0, "", NUMBER);
+                        cur_com_num++;
+                    }
+                }
 
             printf ("cur_str = \"%s\", num = %d\n", cur_str, letter_num);
 
             int hash_ans = Find_Hash (hash.oper, OPERATOR_NUMBER, Make_Hash_Str (cur_str));
-            if (hash_ans != -1)
-                array[cur_com_num] = Create_Node(NULL, NULL, NULL, hash_ans, cur_str, OPERATOR);
+            if (Is_Roman_Num (cur_str))
+                array[cur_com_num] = Create_Node (Roman_Number (cur_str), "", NUMBER);
+            else if (strcmp (cur_str, NEMO) == 0)
+                array[cur_com_num] = Create_Node (0, "", NUMBER);
+            else if (hash_ans != -1)
+                array[cur_com_num] = Create_Node(hash_ans, cur_str, OPERATOR);
             else
             {
                 hash_ans = Find_Hash (hash.k_words, K_WORDS_NUMBER, Make_Hash_Str (cur_str));
@@ -100,12 +111,12 @@ Node** Tokenization (const poem_line* pointer, int num_lines, int& com_num)
         }
         if (no_com)
         {
-            array[cur_com_num] = Create_Node (NULL, NULL, NULL, END_LINE, "\n", END_LINE);
+            array[cur_com_num] = Create_Node (END_LINE, "\n", END_LINE);
             cur_com_num++;
         }
     }
 
-    array[cur_com_num] = Create_Node (NULL, NULL, NULL, NULL, "", OPERATOR);
+    array[cur_com_num] = Create_Node (NULL, "", OPERATOR);
     cur_com_num++;
 
     free (cur_str);

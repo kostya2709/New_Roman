@@ -21,11 +21,12 @@ enum k_words
     ELSE,
     COMMA,
     RETURN,
-    WRITE
+    WRITE,
+    IF
 };
 
 
-const int K_WORDS_NUMBER = 21;
+const int K_WORDS_NUMBER = 22;
 static char* key_words_str[] =
 {
     "null",
@@ -48,7 +49,8 @@ static char* key_words_str[] =
     "Если_нет:",
     ",",
     "В_Рим_возвращается",
-    "Объявить_плебеям"
+    "Объявить_плебеям",
+    "IF"
 };
 
 
@@ -83,10 +85,12 @@ enum operator_num   {
                         CTH,
                         ARCSIN,
                         ARCCOS,
-                        ARCTAN
+                        ARCTAN,
+                        SQRT,
+                        DER
                     };
 
-const int OPERATOR_NUMBER = 20;
+const int OPERATOR_NUMBER = 22;
 static char* oper_str[] =
 {
     "null",
@@ -109,6 +113,10 @@ static char* oper_str[] =
     "arcsin",
     "arccos",
     "arctan",
+    "корень",
+    "производная"
 };
 
-static const char* MAIN = "РИМ";
+static const char* NEMO = "NIHIL";
+
+static const char* MAIN = "Рим";

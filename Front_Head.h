@@ -13,15 +13,17 @@ poem_line;
 const int MAX_PROGRAM_SIZE = 1024;
 const int MAX_PROGRAM_NAME_SIZE = 64;
 
-const int MAX_WORD_NUM = 1024;
-const int MAX_VAR_NAME = 128;
-const int MAX_VAR_AMOUNT = 128;
+const int MAX_WORD_NUM = 2048;
+const int MAX_VAR_NAME = 1024;
+const int MAX_VAR_AMOUNT = 64;
 const int MAX_FUNCS_AMOUNT = 64;
 const int MAX_ARGS_AMOUNT = 10;
 const int MAX_VAR_IN_FUNC = 64;
 const int MAX_GLOBAL_NUM = 32;
 
 bool Is_Symb (char a);
+
+static char* file_asm = "../../ASSSembler/asm_progs/Lang/Lang.txt";
 
 char* File_Reader (char* file_name, long* num_lines, long* num_symb);
 
@@ -35,7 +37,9 @@ int Find_Hash (int64_t* hash_ar, int size, int64_t target);
 
 int Find_Hash (int64_t* hash_ar, int min, int max, int64_t target, int last_global);
 
-void Back_End (Node* start, Hash* hash1);
+void Back_End (Node* start, Hash* hash1, int comp);
+
+void Back_Stand_End (Node* start, Hash* hash1);
 
 poem_line* StringMaker (char* str, int length, int amount);
 
@@ -68,4 +72,8 @@ int Stack_OK (Stack_t* stk);
 
 int Insert_Node (Node* node1, Node* node_new, int pos);
 
-bool Is_Russian (char letter);
+Node* Copy_Node (Node* node);
+
+int Is_Roman_Num (const char* number);
+
+int Roman_Number (const char* number);

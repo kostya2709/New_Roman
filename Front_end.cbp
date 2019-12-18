@@ -37,8 +37,10 @@
 		<Unit filename="File_Reader.cpp" />
 		<Unit filename="Front_Head.h" />
 		<Unit filename="Hash.cpp" />
+		<Unit filename="R_num.cpp" />
 		<Unit filename="Recursive_Descend.cpp" />
 		<Unit filename="Stack_Dyn_Func.cpp" />
+		<Unit filename="Standart_Tree.cpp" />
 		<Unit filename="Tokenization.cpp" />
 		<Unit filename="Tree_Funcs.cpp" />
 		<Unit filename="Tree_Head.h" />

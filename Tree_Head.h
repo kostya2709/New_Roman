@@ -81,7 +81,7 @@ public:
 
     int Calculate_Consts (Node* node1);
 
-    Node* Find_Derive (Node* node1, const char* der_var, int show);
+    Node* Find_Derive (Node* node1);
 
     void Tree_Simplifier (Node* node1);
 

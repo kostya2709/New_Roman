@@ -4,19 +4,15 @@ void Back_End_Cycle(Node* start);
 
 void Push_Call_Func (Node* start);
 
-void Push_Func (Node* start);
+void Push_Func (Node* start, int comp);
 
 void Call_Func (Node* start);
-
-char* file_asm = "../../ASSSembler/asm_progs/Lang/Lang.txt";
 
 FILE* f;
 
 Hash* hash;
 
-
-int comp = 0;
-int cond = 0;
+int comp1 = 0;
 
 void Push_Expr (Node* start)
 {
@@ -32,7 +28,7 @@ void Push_Expr (Node* start)
         Push_Call_Func (start);
 
     if (start->node_type == NUMBER)
-        fprintf (f, "push %lg\n", start->data);
+        fprintf (f, "push %.lf\n", start->data);
 
     if (start->node_type == OPERATOR)
         switch ((int)start->data)
@@ -57,6 +53,11 @@ void Push_Expr (Node* start)
                 fprintf (f, "div\n");
                 break;
             }
+            case SQRT:
+            {
+                fprintf (f, "sqrt\n");
+                break;
+            }
         }
         else if (start->node_type == VAR)
             fprintf (f, "push [ax+%lg]\n", start->data);
@@ -64,36 +65,38 @@ void Push_Expr (Node* start)
 
 void Push_Print (Node* start)
 {
-    int var = start->left->data;
+    int var = start->right->data;
     fprintf (f, "push [ax+%d]\n", var);
     fprintf (f, "out\n");
 }
 
 void Push_Read (Node* start)
 {
-    int var = start->left->data;
+    int var = start->right->data;
     fprintf (f, "in\n");
     fprintf (f, "pop [ax+%d]\n", var);
 }
 
-void Push_One_Cond (Node* start, Node* left, Node* right)
+void Push_One_Cond (Node* start, int comp)
 {
+    Node* left = start->left->left;
+    Node* right = start->left->right;
+
+    Node* condi = start->left;
+
     int in_while = 0;
 
-    if (start->data != ELSE)
+    if (start->data == CYCLE)
     {
-        if (start->data == CYCLE)
-        {
-            in_while = 1;
-            fprintf (f, "while_comp%d_back:\n", comp);
-            start = start->left;
-        }
-
-        Push_Expr (left);
-        Push_Expr (right);
+        in_while = 1;
+        fprintf (f, "while_comp%d_back:\n", comp);
     }
 
-    switch ((int)(start->data))
+    Push_Expr (left);
+    Push_Expr (right);
+
+
+    switch ((int)(condi->data))
     {
         case MORE:
         {
@@ -125,52 +128,44 @@ void Push_One_Cond (Node* start, Node* left, Node* right)
             fprintf (f, "jne ");
             break;
         }
-        case ELSE:
+    }
+
+    fprintf (f, "comp%d:\n", comp);
+    fprintf (f, "jmp comp%d_else:\n", comp);
+    fprintf (f, "comp%d:\n", comp);
+
+    int temp_comp = comp;
+
+    if (strcmp (start->right->sym, "C")== 0)
+        Push_Func (start->right->right, comp1);
+    else Push_Func (start->right, comp1);
+
+    if (in_while)
+        fprintf (f, "jmp while_comp%d_back:\n", temp_comp);
+
+
+    if (!in_while) fprintf (f, "jmp comp%d_out:\n", comp);
+    fprintf (f, "comp%d_else:\n\n", temp_comp);
+
+    if (strcmp (start->right->sym, "C") == 0)
+    {
+        if (start->right->left->right->right->node_type == OPERATOR)
         {
-
-            break;
+            comp1++;
+            Push_One_Cond(start->right->left->right->right, comp1);
         }
-
+        else
+            Push_Func (start->right->left->right, comp1);
     }
-
-    if (start->data != ELSE)
-    {
-        fprintf (f, "comp%d_cond%d:\n", comp, cond);
-        fprintf (f, "jmp comp%d_cond%d_else:\n", comp, cond);
-        fprintf (f, "comp%d_cond%d:\n", comp, cond);
-    }
-
-    Push_Func (start->left);
-
-    if (in_while)
-        fprintf (f, "jmp while_comp%d_back:\n", comp);
-
-    if (start->data != ELSE)
-    {
-        if (!in_while) fprintf (f, "jmp comp%d_out:\n", comp);
-        fprintf (f, "comp%d_cond%d_else:\n\n", comp, cond);
-    }
-
-    cond++;
-
-    if (in_while)
-        if (start->parent->right)
-            Push_One_Cond(start->parent->right, left, right);
-
-    if (start->right && !(in_while))
-        Push_One_Cond(start->right, left, right);
 }
 
-void Push_Invade (Node* start)
+void Push_Invade (Node* start, int comp)
 {
-    Node* left_expr = start->left->left;
-    Node* right_expr = start->left->right;
+    comp1++;
+    int temp = comp1;
+    Push_One_Cond (start, comp1);
 
-    Push_One_Cond (start->right, left_expr, right_expr);
-
-    fprintf (f, "comp%d_out:\n\n\n", comp);
-    cond = 0;
-    comp++;
+    fprintf (f, "comp%d_out:\n\n\n", temp);
 }
 
 void Push_Assign (Node* start)
@@ -184,7 +179,7 @@ void Push_Assign (Node* start)
 
 void Push_Return (Node* start)
 {
-    Push_Expr (start->left);
+    Push_Expr (start->right);
     fprintf (f, "\npush ax\n");
     fprintf (f, "push %d\n", MAX_VAR_IN_FUNC);
     fprintf (f, "min\n");
@@ -194,15 +189,14 @@ void Push_Return (Node* start)
 
 void Push_Call_Args (Node* start)
 {
-    Push_Expr (start->left);
-    if (start->right)
-        Push_Call_Args (start->right);
+    Push_Expr (start->right);
+    if (start->left)
+        Push_Call_Args (start->left);
 }
 
 void Push_Call_Func (Node* start)
 {
-
-    char* func = start->sym;
+    char* func = start->right->sym;
 
     if (start->left)
         Push_Call_Args (start->left);
@@ -216,66 +210,69 @@ void Push_Call_Func (Node* start)
 
 }
 
-void Push_Func (Node* start)
+void Push_Func (Node* start, int comp)
 {
-    if (start->left == 0)
-        return;
+    assert (start);
 
-    if (start->left->node_type == CALL)
-        Push_Call_Func (start->left);
-    else
-    switch ((int)(start->left->data))
+    if (strcmp (start->sym, "B") == 0)
+        Push_Func (start->right, comp);
+    if (start->right == 0)
+            return;
+    if (start->right->node_type == CALL)
+        Push_Call_Func (start->right);
+    else switch ((int)(start->right->data))
     {
         case ASSIGN:
         {
-            Push_Assign (start->left);
+            Push_Assign (start->right);
             break;
         }
         case PRINT:
         {
-            Push_Print (start->left);
+            Push_Print (start->right);
             break;
         }
         case READ:
         {
-            Push_Read(start->left);
+            Push_Read(start->right);
             break;
         }
-        case INVADE:
+        case CYCLE:
+        case IF:
         {
-            Push_Invade (start->left);
+            Push_Invade (start->right, comp);
             break;
         }
         case RETURN:
         {
-            Push_Return (start->left);
+            Push_Return (start->right);
             break;
         }
         case WRITE:
         {
-            fprintf (f, "\noutf \"%s\"\n\n", start->left->left->sym);
+            fprintf (f, "\noutf \"%s\"\n\n", start->right->right->sym);
+            break;
         }
     }
 
     fprintf (f, "\n");
 
-    if (start->right)
-        Push_Func (start->right);
+    if (start->left)
+        Push_Func (start->left, comp);
 
 }
 
 void Push_Func_Args (Node* start)
 {
-    if (start->right)
-        Push_Func_Args (start->right);
+    if (start->left)
+        Push_Func_Args (start->left);
 
-    fprintf (f, "pop [ax+%d]\n", (int)start->left->data);
+    fprintf (f, "pop [ax+%d]\n", (int)start->right->data);
 }
 
-void Push_Func_Up (Node* start)
+void Push_Func_Up (Node* start, int comp)
 {
-
-    fprintf (f, "%s:\n", start->sym);
+    fprintf (f, "%s:\n", start->right->sym);
 
     if (start->left)
         Push_Func_Args (start->left);
@@ -284,44 +281,44 @@ void Push_Func_Up (Node* start)
 
     if (start->right)
     {
-        Push_Func (start->right);
+        Push_Func (start->right->right, comp);
     }
 
 }
 
-void Back_End_Cycle (Node* start)
+void Back_End_Cycle (Node* start, int comp)
 {
-    switch ((int)(start->left->node_type))
+    switch ((int)(start->right->node_type))
     {
         case K_WORD:                    // Global assignation
         {
-            Push_Assign (start->left);
+            Push_Assign (start->right);
             break;
         }
         case LINK:                      // Function declaration
         {
-            Push_Func_Up (start->left);
+            Push_Func_Up (start->right, comp);
             break;
         }
     }
 
     fprintf (f, "\n");
 
-    if (start->right)
-        Back_End_Cycle (start->right);
+    if (start->left)
+        Back_End_Cycle (start->left, comp);
 }
 
 
-void Back_End (Node* start, Hash* hash1)
+void Back_End (Node* start, Hash* hash1, int comp)
 {
     f = fopen (file_asm, "w");
     hash = hash1;
 
     fprintf (f, "call %s:\n", MAIN);
-    int randd = rand()%100000 + 100000;
+    int randd = rand()%1000 + 1000;
     fprintf (f, "jmp end%d:\n\n\n", randd);
 
-    Back_End_Cycle (start->right);
+    Back_End_Cycle (start->right, comp);
 
     fprintf (f, "end%d:\n", randd);
     fprintf (f, "end");

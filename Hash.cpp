@@ -75,6 +75,7 @@ Hash::~Hash()
     free (this->oper);
     free (this->var);
     free (this->funcs);
+    free (this->args);
 }
 
 int Hash::Add_Var (int64_t var_hash)

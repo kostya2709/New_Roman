@@ -49,9 +49,9 @@ Node* Get_Line ();
 
 Node* Get_Link ();
 
-Node* Get_Conditions (void);
+Node* Get_Conditions (Node* var_left, Node* var_right);
 
-Node* Get_One_Cond (void);
+Node* Get_One_Cond (Node* var_left, Node* var_right);
 
 Node* Get_Program (void);
 
@@ -75,7 +75,7 @@ Node* Get_General (Node** prog_node, Hash** hash1)
 
     Stack_Construct (&var_stk);
 
-    Node* result = Create_Node(NULL, Get_Program(), NULL, 27, "PROGRAM", OPERATOR);
+    Node* result = Create_Node(NULL, Get_Program(), NULL, 27, "START", OPERATOR);
     if ((*program_node)->data == NULL && (*program_node)->node_type == OPERATOR)
         ;
     else
@@ -106,6 +106,8 @@ Node* Get_Brackets ()
     Stack_Push (&var_stk, hash.var_amount);
 
     Node* temp = Get_Link ();
+    sprintf (temp->sym, "OP");
+    Node* bracket = Create_Node (NULL, temp, NULL, NULL, "B", LINK);
 
     hash.var_amount = Stack_Pop (&var_stk);
 
@@ -122,17 +124,17 @@ Node* Get_Brackets ()
     for (int i =0; i < hash.var_amount; i++)
         printf ("%d %d\n", i, hash.var[i]);
 
-    return temp;
+    return bracket;
 
 }
 
 Node* Get_Link ()
 {
-    Node* left = Get_Line ();
+    Node* right = Get_Line ();
     if ((*program_node)->data == END && (*program_node)->node_type == K_WORD)
-        return Create_Node (left, NULL, NULL, LINK, "LINK", LINK);
+        return Create_Node (NULL, right, NULL, LINK, "OP", LINK);
     else
-        return Create_Node (left, Get_Link(), NULL, LINK, "LINK", LINK);
+        return Create_Node (Get_Link(), right, NULL, LINK, "OP", LINK);
 }
 
 Node* Get_Line ()
@@ -150,7 +152,7 @@ Node* Get_Line ()
             if (var_num != -1)
                 ;
             else
-            {   printf ("OK, %s\n", (*program_node)->sym);
+            {
                 var_num = Find_Hash (hash.var, hash.var_amount, (*program_node)->data);
                 if (var_num == -1)
                     var_num = hash.Add_Var ((*program_node)->data) - 1;
@@ -171,19 +173,19 @@ Node* Get_Line ()
                         case ASSIGN:
                         {
                             program_node++;
-                            temp = Create_Node (temp, Get_Expr (), NULL, ASSIGN, key_words_str[ASSIGN], K_WORD);
+                            temp = Create_Node (temp, Get_Expr (), NULL, ASSIGN, "\'=\'", K_WORD);
                             break;
                         }
                         case PRINT:
                         {
                             program_node++;
-                            temp = Create_Node (temp, NULL, NULL, PRINT, key_words_str[PRINT], K_WORD);
+                            temp = Create_Node (NULL, temp, NULL, PRINT, "OUTPUT", K_WORD);
                             break;
                         }
                         case READ:
                         {
                             program_node++;
-                            temp = Create_Node (temp, NULL, NULL, READ, key_words_str[READ], K_WORD);
+                            temp = Create_Node (NULL, temp, NULL, READ, "INPUT", K_WORD);
                             break;
                         }
                         case OPEN_BR:
@@ -330,10 +332,6 @@ Node* Func ()
 
 Node* Get_Str (void)
 {
-
-    Print_Vars ();
-    printf ("var %s\n", (*program_node)->sym);
-
     if ((*program_node)->node_type == OPERATOR)
                 return Func();
     else
@@ -380,7 +378,7 @@ assert (val);
     return val;
 }
 
-Node* Get_Conditions (void)
+Node* Get_Conditions (Node* var_left, Node* var_right)
 {
     if (((*program_node)->data == BEGIN) && (*program_node)->node_type == K_WORD)
         program_node++;
@@ -392,7 +390,8 @@ Node* Get_Conditions (void)
 
     Check_End_Line ();
 
-    Node* temp = Get_One_Cond();
+    Node* temp = Get_One_Cond (var_left, var_right);
+    //if (temp->node_type)
 
     if (((*program_node)->data == END) && (*program_node)->node_type == K_WORD)
         program_node++;
@@ -405,7 +404,7 @@ Node* Get_Conditions (void)
     return temp;
 }
 
-Node* Get_One_Cond ()
+Node* Get_One_Cond (Node* var_left, Node* var_right)
 {
     if ((*program_node)->node_type != K_WORD)
     {
@@ -413,13 +412,13 @@ Node* Get_One_Cond ()
         exit(0);
     }
 
-    bool in_cycle = 0;
+    Node* if_node = Create_Node (IF, "IF", K_WORD);
 
     if ((*program_node)->data == CYCLE)
     {
-        in_cycle = 1;
         program_node++;
         Check_End_Line();
+        if_node = Create_Node (CYCLE, "WHILE", K_WORD);
 
         if ((*program_node)->node_type != K_WORD)
         {
@@ -428,47 +427,57 @@ Node* Get_One_Cond ()
         }
     }
 
-    Node* temp = NULL;
+    Node* cond = NULL;
 
     Node* temp2 = NULL;
 
     Node* cyc = NULL;
 
+    if ((*program_node)->data == ELSE)
+    {
+        program_node++;
+        if ((*program_node)->node_type == END_LINE)
+        {
+            program_node++;
+            temp2 = Get_Brackets();
+            temp2 = temp2->right;
+        }
+        else
+            temp2 = Get_Line();
+
+        return temp2;
+    }
+
     switch ((int)((*program_node)->data))
     {
         case (MORE):
         {
-            temp = Create_Node (NULL, NULL, NULL, MORE, "A", OPERATOR);
+            cond = Create_Node (MORE, "MORE", OPERATOR);
             break;
         }
         case (EMORE):
         {
-            temp = Create_Node (NULL, NULL, NULL, EMORE, "AE", OPERATOR);
+            cond = Create_Node (EMORE, "EMORE", OPERATOR);
             break;
         }
         case (LESS):
         {
-            temp = Create_Node (NULL, NULL, NULL, LESS, "L", OPERATOR);
+            cond = Create_Node (LESS, "LESS", OPERATOR);
             break;
         }
         case (ELESS):
         {
-            temp = Create_Node (NULL, NULL, NULL, ELESS, "LE", OPERATOR);
+            cond = Create_Node (ELESS, "ELESS", OPERATOR);
             break;
         }
         case (EQUAL):
         {
-            temp = Create_Node (NULL, NULL, NULL, EQUAL, "E", OPERATOR);
+            cond = Create_Node (EQUAL, "EQUAL", OPERATOR);
             break;
         }
         case (UNEQUAL):
         {
-            temp = Create_Node (NULL, NULL, NULL, UNEQUAL, "UE", OPERATOR);
-            break;
-        }
-        case (ELSE):
-        {
-            temp = Create_Node (NULL, NULL, NULL, ELSE, "ELSE", OPERATOR);
+            cond = Create_Node (UNEQUAL, "UNEQUAL", OPERATOR);
             break;
         }
         default:
@@ -477,6 +486,11 @@ Node* Get_One_Cond ()
             break;
         }
     }
+
+    Insert_Node (if_node, cond, 0);
+    Insert_Node (cond, var_left, 0);
+    Insert_Node (cond, var_right, 1);
+
     program_node++;
 
     if ((*program_node)->node_type == END_LINE)
@@ -487,36 +501,42 @@ Node* Get_One_Cond ()
     else
     {
         temp2 = Get_Line();
-        Node* temp_temp = Create_Node (temp2, NULL, NULL, LINK, "LINK", LINK);
+        Node* temp_temp = Create_Node (LINK, "B", LINK);
+        Node* oper = Create_Node (NULL, "OP", LINK);
+        Insert_Node (temp_temp, oper, 1);
+        Insert_Node (oper, temp2, 1);
         temp2 = temp_temp;
     }
 
-    temp->left = temp2;
-    temp2->parent = temp;
 
     if ((*program_node)->node_type == K_WORD && (*program_node)->data == END)
     {
-        if (in_cycle)
-            return Create_Node (temp, NULL, NULL, CYCLE, "WHILE", K_WORD);
-
-        return temp;
+        Insert_Node (if_node, temp2, 1);
+        return if_node;
     }
     else
     {
-        Node* temp3 = Get_One_Cond();
-
-        if (in_cycle)
+        Node* temp3 = Get_One_Cond (Copy_Node (var_left), Copy_Node (var_right));
+        int is_else = 0;
+        if (temp3->node_type == LINK) is_else = 1;
+        Node* connect = Create_Node (NULL, "C", LINK);
+        Node* bracket = Create_Node (NULL, "B", LINK);
+        if (!is_else)
         {
-            cyc = Create_Node (temp, NULL, NULL, CYCLE, "WHILE", K_WORD);
-            cyc->right = temp3;
-            temp3->parent = cyc;
-            return cyc;
+            Node* oper = Create_Node (NULL, "OP", LINK);
+            Insert_Node (bracket, oper, 1);
+            Insert_Node (oper, temp3, 1);
+        }
+        else
+        {
+            Insert_Node (bracket, temp3, 1);
         }
 
-        temp->right = temp3;
-        temp3->parent = temp;
+        Insert_Node (connect, bracket, 0);
+        Insert_Node (if_node, connect, 1);
+        Insert_Node (connect, temp2, 1);
 
-        return temp;
+        return if_node;
     }
 }
 
@@ -524,7 +544,7 @@ Node* Get_If (void)
 {
 
     program_node++;
-    Node* left = Get_Expr();
+    Node* var_left = Get_Expr();
     if ((*program_node)->node_type == K_WORD && (*program_node)->data == INVADE)
             ;
     else
@@ -534,13 +554,11 @@ Node* Get_If (void)
     }
     program_node++;
 
-    Node* right = Get_Expr();
+    Node* var_right = Get_Expr();
 
     Check_End_Line();
 
-    Node* temp = Create_Node(left, right, NULL, INVADE, "SLINK", LINK);
-
-    temp = Create_Node (temp, Get_Conditions(), NULL, INVADE, "SLINK", LINK);
+    Node* temp = Get_Conditions (var_left, var_right);
 
     return temp;
 }
@@ -566,7 +584,7 @@ Node* Get_Program (void)
     }
 
     Node* temp = NULL;
-    Node* l_node = Create_Node (NULL, NULL, NULL, LINK, "LINK", LINK);
+    Node* l_node = Create_Node (LINK, "D", LINK);
 
     if ((*(program_node + 1))->node_type == K_WORD
             && (*(program_node + 1))->data == OPEN_BR)
@@ -578,14 +596,14 @@ Node* Get_Program (void)
     else
         temp = Get_Global();
 
-    Insert_Node (l_node, temp, 0);
+    Insert_Node (l_node, temp, 1);
 
     if ((*program_node)->data == NULL && (*program_node)->node_type == OPERATOR)
         ;
     else
     {
         Node* temp2 = Get_Program ();
-        Insert_Node (l_node, temp2, 1);
+        Insert_Node (l_node, temp2, 0);
     }
 
     return l_node;
@@ -608,13 +626,15 @@ Node* Get_Dec()
     program_node += 2;  //Jumped over '('
     int arg_num = 0;
 
+    Node* result = Create_Node (NULL, "DEF", LINK);
+
     if (N_TYPE == K_WORD && N_DATA == CLOSE_BR)
         program_node++;
     else
     {
         arg_num = 1;
         Node* left = Get_Func_Args (arg_num);
-        Insert_Node (f_node, left, 0);
+        Insert_Node (result, left, 0);
     }
 
     hash.args[hash.funcs_num - 1] = arg_num;
@@ -623,9 +643,11 @@ Node* Get_Dec()
 
     Check_End_Line();
 
+    Insert_Node (result, f_node, 1);
+
     Insert_Node (f_node, Get_Brackets (), 1);
 
-    return f_node;
+    return result;
 
 }
 
@@ -669,7 +691,9 @@ Node* Get_Call()
     int64_t func_hash = (*(program_node - 1))->data;
     int min_var = hash.var_amount;
 
-    Node* call = Create_Node (min_var, (*(program_node - 1))->sym, CALL);
+    Node* call = Create_Node (min_var, "CALL", CALL);
+    Node* func = Create_Node (min_var, (*(program_node - 1))->sym, VAR);
+    Insert_Node (call, func, 1);
 
     int64_t found = Find_Hash (hash.funcs, hash.funcs_num, func_hash);
     if (found == -1)
@@ -701,9 +725,9 @@ Node* Get_Call()
 
 Node* Get_Call_Args (int& args_num)
 {
-    Node* link = Create_Node (LINK, "LINK", LINK);
+    Node* link = Create_Node (LINK, ",", LINK);
     Node* arg = Get_Expr();
-    Insert_Node (link, arg, 0);
+    Insert_Node (link, arg, 1);
     args_num++;
 
     if (N_TYPE == K_WORD && N_DATA == CLOSE_BR)
@@ -714,7 +738,7 @@ Node* Get_Call_Args (int& args_num)
     else if (N_TYPE == K_WORD && N_DATA == COMMA)
     {
         program_node++;
-        Insert_Node (link, Get_Call_Args (args_num), 1);
+        Insert_Node (link, Get_Call_Args (args_num), 0);
         return link;
     }
     else
@@ -727,7 +751,7 @@ Node* Get_Call_Args (int& args_num)
 
 Node* Get_Func_Args(int& num)
 {
-    Node* l_node = Create_Node (LINK, "LINK", LINK);
+    Node* l_node = Create_Node (LINK, ",", LINK);
 
     if (N_TYPE == VAR)
         ;
@@ -753,14 +777,14 @@ Node* Get_Func_Args(int& num)
             cur_arg_num++;
         }
 
-    Insert_Node (l_node, *program_node, 0);
+    Insert_Node (l_node, *program_node, 1);
     program_node++;
 
     if (N_DATA == COMMA && N_TYPE == K_WORD)
     {
         num += 1;
         program_node++;
-        Insert_Node (l_node, Get_Func_Args (num), 1);
+        Insert_Node (l_node, Get_Func_Args (num), 0);
         program_node--;
     }
     if (N_DATA == CLOSE_BR && N_TYPE == K_WORD)
@@ -778,12 +802,12 @@ Node* Get_Func_Args(int& num)
 
 Node* Get_Return ()
 {
-printf ("IN RETURN %s\n", (*program_node)->sym);
     Node* temp = (*program_node);
+    sprintf (temp->sym, "RETURN");
     program_node++;
 
     Node* expr = Get_Expr();
-    Insert_Node(temp, expr, 0);
+    Insert_Node(temp, expr, 1);
 
     return temp;
 }
@@ -810,6 +834,7 @@ void Print_Vars (void)
 Node* Get_String ()
 {
     Node* n_write = *program_node;
+    sprintf (n_write->sym, "OUTPUT");
     program_node++;
 
     if ((*program_node)->node_type != STRING)
@@ -819,7 +844,7 @@ Node* Get_String ()
         exit (0);
     }
 
-    Insert_Node (n_write, *program_node, 0);
+    Insert_Node (n_write, *program_node, 1);
     program_node++;
 
     return n_write;

@@ -17,7 +17,7 @@ int main()
     program_str = File_Reader (program_name, &num_lines, &program_size);
     printf ("%s\n", program_str);
 
-    char* program_copy = (char*)calloc (1, program_size);
+    char* program_copy = (char*)calloc (1, program_size + 1);
     sprintf (program_copy, "%s", program_str);
     poem_line* pointer = StringMaker (program_copy, program_size, num_lines);
 
@@ -26,8 +26,8 @@ int main()
     printf ("hash hey = %d\n", Make_Hash_Str("hey"));
 
     int com_num = 0;
-
-    Node** node_line = Tokenization (pointer, num_lines, com_num);
+printf ("sssuk\n");
+    Node** node_line = Tokenization (pointer, num_lines, com_num);printf ("suk\n");
 
     printf ("\n\nCHECK\n\n");
     int i = 0;
@@ -40,10 +40,14 @@ int main()
     Tree prog_tree;
     prog_tree.Insert_Node(Get_General(node_line, &hash));
     prog_tree.Tree_Simplifier(prog_tree.first_elem);
+    Tree standard_tree;
+    standard_tree.Insert_Node (Tree_Copy (prog_tree.first_elem));
     prog_tree.Dump();
 
-    Back_End (prog_tree.first_elem, hash);
+    Back_End (prog_tree.first_elem, hash, 0);
 
+    free (node_line);
+    free (pointer);
     free (program_name);
     free (program_str);
     free (program_copy);

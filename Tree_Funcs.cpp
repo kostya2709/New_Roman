@@ -2,7 +2,7 @@
 
 Node::Node(): left (NULL), right (NULL), parent (NULL), data (-1), node_type (0)
 {
-    sym = (char*)calloc (1, operator_size);
+    sym = (char*)calloc (1, MAX_VAR_NAME);
 }
 
 Node::~Node()
@@ -292,4 +292,11 @@ int Tree_Copy_Cycle (Node* prev_node, Node* new_node)
         node_r->parent = new_node;
         Tree_Copy_Cycle (prev_node->right, node_r);
     }
+}
+
+Node* Copy_Node (Node* node)
+{
+    Node* ans = Create_Node (node->left, node->right, node->parent, node->data, " ", node->node_type);
+    sprintf (ans->sym, "%s", node->sym);
+    return ans;
 }

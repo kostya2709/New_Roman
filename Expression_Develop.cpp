@@ -85,6 +85,7 @@ elem_t Find_Sol (elem_t a, int operator_t)
         case CTH: return cosh (a) / sinh (a);
         case LN: return log (a);
         case LG: return log (a) / log (10);
+        case SQRT: return sqrt(a);
 
         default: printf ("UNDEFINED OPERATOR \"%d\"!\n", operator_t);
     }

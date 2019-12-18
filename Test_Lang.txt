@@ -1,42 +1,18 @@
-call main:
-jmp end189383:
+int Gallician_War (int Caesar)
+{
+	int galli = 0;
+	if (Caesar <= galli)
+		return 1;
+	return Caesar * Gallician_War (Caesar - 1);
+}
 
-
-push 5
-pop [0]
-
-func:
-pop [32]
-
-push [32]
-out
-
-
-main:
-
-push 5
-call func:
-
-
-in
-pop [96]
-
-push [96]
-push 5
-push [96]
-mul
-add
-push [96]
-add
-pop [97]
-
-push [97]
-out
-
-push 0
-ret
-
-
-
-end189383:
-end
+int main()
+{
+	int Caesar = 0;
+	scanf ("%d", &Caesar);
+	printf ("%d", Caesar);
+	int gonets = Gallician_War (Caesar);
+	printf ("\nИтоги войны равны ");
+	printf ("%d", gonets);
+	return 0;
+}
