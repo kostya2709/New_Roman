@@ -2,7 +2,6 @@
 
 Node* Tree::Find_Derive (Node* node1)
 {
-
 #include "DEFINES.h"
 
 Node* answer = NULL;
@@ -119,7 +118,11 @@ Node* answer = NULL;
             case VAR:
             {
                 node1->node_type = NUMBER;
-                N_DATA = 1;
+                if (strcmp (node1->sym, "Цезарь") == 0)
+                    N_DATA = 1;
+                else
+                    N_DATA = 0;
+
                 break;
             }
 

@@ -22,7 +22,7 @@
 	<math.h>
 	"Tree_Head.h"
 
-1576498124 source:/home/kostya/progs/New_Roman_Language/Front_end/Tokenization.cpp
+1576695126 source:/home/kostya/progs/New_Roman_Language/Front_end/Tokenization.cpp
 	"Front_Head.h"
 
 1576694140 /home/kostya/progs/New_Roman_Language/Front_end/Tree_Head.h
@@ -49,7 +49,7 @@
 1576693060 source:/home/kostya/progs/New_Roman_Language/Front_end/Recursive_Descend.cpp
 	"Front_Head.h"
 
-1576503875 source:/home/kostya/progs/New_Roman_Language/Front_end/Expression_Develop.cpp
+1576698917 source:/home/kostya/progs/New_Roman_Language/Front_end/Expression_Develop.cpp
 	"Front_Head.h"
 
 1576692729 source:/home/kostya/progs/New_Roman_Language/Front_end/Back_end.cpp
@@ -71,7 +71,7 @@
 	<stdlib.h>
 	<stdio.h>
 
-1576694015 source:/home/kostya/progs/New_Roman_Language/Front_end/Derive.cpp
+1576698189 source:/home/kostya/progs/New_Roman_Language/Front_end/Derive.cpp
 	"Front_Head.h"
 	"DEFINES.h"
 	"UNDEFS.h"

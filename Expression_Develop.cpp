@@ -24,7 +24,22 @@ int Tree::Calculate_Consts (Node* node1)
 
     if (NODE_T == OPERATOR)
             if (!node1->left && node1->right)
-                if (RIGHT_T == NUMBER)
+                if (node1->data == DER)
+                {
+                    Node* temp_par = node1->parent;
+                    int side = 0;
+                    if (node1->parent->right == node1)
+                        side = 1;
+
+                    Node* temp_n = Create_Node (NULL, "temp", LINK);
+                    Insert_Node (temp_n, node1->right, 1);
+                    Tree temp;
+                    temp.Insert_Node (temp_n);
+                    Node* new_node = temp.Find_Derive (temp.first_elem->right);
+                    temp.Tree_Simplifier (new_node);
+                    Insert_Node (temp_par, temp_n->right, side);
+                }
+                else if (RIGHT_T == NUMBER)
                 {
                     result = Find_Sol (node1->right->data, node1->data);
                     ddone = 1;
@@ -204,6 +219,7 @@ int Tree::Kill_Zero (Node* node1)
 
 int Tree::Kill_One (Node* node1)
 {
+printf ("LEt's kill one\n");
     Node* kill = NULL;
     Node* live = NULL;
     int dir = 0;
@@ -237,9 +253,9 @@ int Tree::Kill_One (Node* node1)
     }
 
     if ((node1->data == LOG) || (node1->data == POW) || (node1->data == MUL) || ((node1->data == DIV)&&(dir == 1)))
-    {
+    {printf ("near\n");
         if (node1 == this->first_elem)
-            Insert_Node(live);
+            {Insert_Node(live);printf ("ok\n");}
         else
             if (node1 == node1->parent->left)
                 Insert_Node(node1->parent, live, 0);
@@ -262,7 +278,7 @@ void Tree::Tree_Simplifier (Node* node1)
     if (node1->node_type == VAR || node1->node_type == NUMBER)
         return;
 
-    //Make_Simple_Tree (node1);
+    Make_Simple_Tree (node1);
 
     Calculate_Consts (node1);
 
