@@ -45,8 +45,6 @@ int Tree::Insert_Node (Node* node1, Node* node_new, int pos)
 
 int Insert_Node (Node* node1, Node* node_new, int pos)
 {
-    assert (node_new);
-    assert (node1);
 
     if (pos == 0)
         node1->left = node_new;
@@ -59,7 +57,8 @@ int Insert_Node (Node* node1, Node* node_new, int pos)
         return -1;
     }
 
-    node_new->parent = node1;
+    if (node_new)
+        node_new->parent = node1;
 
     return 0;
 }

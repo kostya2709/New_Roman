@@ -374,7 +374,7 @@ Node* Get_Pow (void)
 
         val = Create_Node (val, val2, NULL, POW, oper_str[POW], OPERATOR);
     }
-assert (val);
+    assert (val);
     return val;
 }
 

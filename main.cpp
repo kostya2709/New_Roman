@@ -48,10 +48,11 @@ printf ("sssuk\n");
     printf ("\n\nBEFORE FILE_READ\n\n");
     Tree read_tree;
     read_tree.File_Read ("From Frontend with love.txt", *hash);
-    read_tree.File_Write ("From Frontend-1 with love.txt");
+    //read_tree.File_Write ("From Frontend-1 with love.txt");
     read_tree.Dump();
+    Back_End (read_tree.first_elem, hash, 0);
 
-    Back_End (prog_tree.first_elem, hash, 0);
+//    Frt_End (read_tree.first_elem, hash, 0);
 
     free (node_line);
     free (pointer);

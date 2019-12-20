@@ -11,3 +11,313 @@ AVE_MARIA!
 Спартак выступает_в_сенате
 
 DEUS_VULT!
+
+
+call main:
+jmp end1383:
+
+
+Диоген:
+pop [ax+2]
+pop [ax+1]
+pop [ax+0]
+
+push [ax+1]
+push [ax+1]
+mul
+push 4
+push [ax+0]
+mul
+push [ax+2]
+mul
+min
+pop [ax+3]
+
+push [ax+3]
+
+push ax
+push 64
+min
+pop ax
+ret
+
+
+
+
+Пуническая_война:
+
+in
+pop [ax+0]
+
+in
+pop [ax+1]
+
+in
+pop [ax+2]
+
+push 0
+pop [ax+3]
+
+push [ax+3]
+push [ax+0]
+je comp1:
+jmp comp1_else:
+comp1:
+push [ax+3]
+push [ax+1]
+je comp2:
+jmp comp2_else:
+comp2:
+push [ax+3]
+push [ax+2]
+je comp3:
+jmp comp3_else:
+comp3:
+
+outf "\nБесконечность не предел\n"
+
+
+
+jmp comp3_out:
+comp3_else:
+
+push [ax+3]
+push [ax+2]
+jne comp4:
+jmp comp4_else:
+comp4:
+
+outf "\nКорней нет, но вы держитесь.\n"
+
+
+
+jmp comp4_out:
+comp4_else:
+
+comp4_out:
+
+
+
+comp3_out:
+
+
+
+
+jmp comp2_out:
+comp2_else:
+
+push [ax+3]
+push [ax+1]
+jne comp5:
+jmp comp5_else:
+comp5:
+push [ax+3]
+push [ax+2]
+je comp6:
+jmp comp6_else:
+comp6:
+
+outf "\nОдин корень - 0.\n"
+
+
+
+jmp comp6_out:
+comp6_else:
+
+push [ax+3]
+push [ax+2]
+jne comp7:
+jmp comp7_else:
+comp7:
+
+outf "\nКорень только один\n"
+
+
+push -1
+push [ax+2]
+push [ax+1]
+div
+mul
+pop [ax+2]
+
+push [ax+2]
+out
+
+
+outf "\n"
+
+
+
+jmp comp7_out:
+comp7_else:
+
+comp7_out:
+
+
+
+comp6_out:
+
+
+
+
+jmp comp5_out:
+comp5_else:
+
+comp5_out:
+
+
+
+comp2_out:
+
+
+
+
+jmp comp1_out:
+comp1_else:
+
+push [ax+3]
+push [ax+0]
+jne comp8:
+jmp comp8_else:
+comp8:
+push 0
+pop [ax+4]
+
+push [ax+0]
+push [ax+1]
+push [ax+2]
+push ax
+push 64
+add
+pop ax
+call Диоген:
+
+pop [ax+5]
+
+
+outf "Дискриминант равен\n"
+
+
+push [ax+5]
+out
+
+
+outf "\n"
+
+
+push [ax+5]
+push [ax+4]
+jl comp9:
+jmp comp9_else:
+comp9:
+
+outf "\nДискриминант отрицательный\n"
+
+
+
+jmp comp9_out:
+comp9_else:
+
+push -1
+push [ax+1]
+mul
+push [ax+5]
+sqrt
+add
+push 2
+push [ax+0]
+mul
+div
+pop [ax+2]
+
+
+outf "\nПервый корень:\n"
+
+
+push [ax+2]
+out
+
+push -1
+push [ax+1]
+mul
+push [ax+5]
+sqrt
+min
+push 2
+push [ax+0]
+mul
+div
+pop [ax+2]
+
+
+outf "\nВторой корень:\n"
+
+
+push [ax+2]
+out
+
+
+outf "\n"
+
+
+comp9_out:
+
+
+
+
+jmp comp8_out:
+comp8_else:
+
+comp8_out:
+
+
+
+comp1_out:
+
+
+
+push 0
+
+push ax
+push 64
+min
+pop ax
+ret
+
+
+
+
+main:
+
+push 1
+pop [ax+0]
+
+while_comp10_back:
+push [ax+0]
+push 1
+je comp10:
+jmp comp10_else:
+comp10:
+
+outf "\n\nВведите коэффициенты:\n\n"
+
+
+push ax
+push 64
+add
+pop ax
+call Пуническая_война:
+
+
+
+jmp while_comp10_back:
+comp10_else:
+
+comp10_out:
+
+
+
+
+
+end1383:
+end
