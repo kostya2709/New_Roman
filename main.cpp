@@ -52,7 +52,7 @@ printf ("sssuk\n");
     read_tree.Dump();
     Back_End (read_tree.first_elem, hash, 0);
 
-//    Frt_End (read_tree.first_elem, hash, 0);
+    Frt_End (read_tree.first_elem, hash, 0);
 
     free (node_line);
     free (pointer);

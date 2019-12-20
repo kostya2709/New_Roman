@@ -77,3 +77,5 @@ Node* Copy_Node (Node* node);
 int Is_Roman_Num (const char* number);
 
 int Roman_Number (const char* number);
+
+void Frt_End (Node* start, Hash* hash1, int comp);

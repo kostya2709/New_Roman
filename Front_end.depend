@@ -11,12 +11,12 @@
 
 1575639223 source:/home/kostya/progs/New_Roman_Language/Front_end/Tokenesation.cpp
 
-1576835602 source:/home/kostya/progs/New_Roman_Language/Front_end/main.cpp
+1576836800 source:/home/kostya/progs/New_Roman_Language/Front_end/main.cpp
 	<stdio.h>
 	<stdlib.h>
 	"Front_Head.h"
 
-1576507004 /home/kostya/progs/New_Roman_Language/Front_end/Front_Head.h
+1576836888 /home/kostya/progs/New_Roman_Language/Front_end/Front_Head.h
 	<stdio.h>
 	<stdlib.h>
 	<math.h>
@@ -83,5 +83,6 @@
 1576835790 source:/home/kostya/progs/New_Roman_Language/Front_end/Txt_Files.cpp
 	"Front_Head.h"
 
-1576831149 source:/home/kostya/progs/New_Roman_Language/Front_end/Frontend-1.cpp
+1576843783 source:/home/kostya/progs/New_Roman_Language/Front_end/Frontend-1.cpp
+	"Front_Head.h"
 

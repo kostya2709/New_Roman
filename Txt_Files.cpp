@@ -6,12 +6,6 @@ char* cur_ptr = NULL;
 
 int Find_Node_Char (Node& node1, char* sym);
 
-void Insert_Tabs (FILE* f, int number)
-{
-    int i = 0;
-    for (i = 0; i < number; i++)
-        fprintf (f, "\t");
-}
 
 
 

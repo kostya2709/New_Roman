@@ -1,4 +1,4 @@
-/*#include "Front_Head.h"
+#include "Front_Head.h"
 
 void Frt_End_Cycle(Node* start);
 
@@ -8,11 +8,18 @@ void Frt_Func (Node* start, int comp);
 
 void Call_Func (Node* start);
 
-FILE* f;
+static FILE* f;
 
-Hash* hash;
+static Hash* hash;
 
-int comp1 = 0;
+static int comp1 = 0;
+
+void Insert_Tabs (FILE* f, int number)
+{
+    int i = 0;
+    for (i = 0; i < number; i++)
+        fprintf (f, "\t");
+}
 
 void Frt_Expr (Node* start)
 {
@@ -20,61 +27,59 @@ void Frt_Expr (Node* start)
         if (start->node_type != CALL)
             Frt_Expr (start->left);
 
-    if (start->right)
-        if (start->node_type != CALL)
-            Frt_Expr (start->right);
-
     if (start->node_type == CALL)
         Frt_Call_Func (start);
 
     if (start->node_type == NUMBER)
-        fprintf (f, "push %.lf\n", start->data);
+        fprintf (f, "%.lf", start->data);
 
     if (start->node_type == OPERATOR)
         switch ((int)start->data)
         {
             case ADD:
             {
-                fprintf (f, "add\n");
+                fprintf (f, " + ");
                 break;
             }
             case MIN:
             {
-                fprintf (f, "min\n");
+                fprintf (f, " - ");
                 break;
             }
             case MUL:
             {
-                fprintf (f, "mul\n");
+                fprintf (f, " * ");
                 break;
             }
             case DIV:
             {
-                fprintf (f, "div\n");
+                fprintf (f, " / ");
                 break;
             }
             case SQRT:
             {
-                fprintf (f, "sqrt\n");
+                fprintf (f, "sqrt ");
                 break;
             }
         }
         else if (start->node_type == VAR)
-            fprintf (f, "push [ax+%lg]\n", start->data);
+            fprintf (f, "%s", start->sym);
+
+    if (start->right)
+        if (start->node_type != CALL)
+            Frt_Expr (start->right);
 }
 
 void Frt_Print (Node* start)
 {
     int var = start->right->data;
-    fprintf (f, "push [ax+%d]\n", var);
-    fprintf (f, "out\n");
+    fprintf (f, "%s выступает_в_сенате\n", start->right->sym);
 }
 
 void Frt_Read (Node* start)
 {
     int var = start->right->data;
-    fprintf (f, "in\n");
-    fprintf (f, "pop [ax+%d]\n", var);
+    fprintf (f, "%s познает_волю_богов\n", start->right->sym);
 }
 
 void Frt_One_Cond (Node* start, int comp)
@@ -84,55 +89,11 @@ void Frt_One_Cond (Node* start, int comp)
 
     Node* condi = start->left;
 
-    int in_while = 0;
 
     if (start->data == CYCLE)
-    {
-        in_while = 1;
-        fprintf (f, "while_comp%d_back:\n", comp);
-    }
+        fprintf (f, "%s\n", key_words_str [CYCLE]);
 
-    Frt_Expr (left);
-    Frt_Expr (right);
-
-
-    switch ((int)(condi->data))
-    {
-        case MORE:
-        {
-            fprintf (f, "ja ");
-            break;
-        }
-        case EMORE:
-        {
-            fprintf (f, "jae ");
-            break;
-        }
-        case LESS:
-        {
-            fprintf (f, "jl ");
-            break;
-        }
-        case ELESS:
-        {
-            fprintf (f, "jle ");
-            break;
-        }
-        case EQUAL:
-        {
-            fprintf (f, "je ");
-            break;
-        }
-        case UNEQUAL:
-        {
-            fprintf (f, "jne ");
-            break;
-        }
-    }
-
-    fprintf (f, "comp%d:\n", comp);
-    fprintf (f, "jmp comp%d_else:\n", comp);
-    fprintf (f, "comp%d:\n", comp);
+    fprintf (f, "%s:\n", key_words_str [(int)(condi->data)]);
 
     int temp_comp = comp;
 
@@ -140,12 +101,6 @@ void Frt_One_Cond (Node* start, int comp)
         Frt_Func (start->right->right, comp1);
     else Frt_Func (start->right, comp1);
 
-    if (in_while)
-        fprintf (f, "jmp while_comp%d_back:\n", temp_comp);
-
-
-    if (!in_while) fprintf (f, "jmp comp%d_out:\n", comp);
-    fprintf (f, "comp%d_else:\n\n", temp_comp);
 
     if (strcmp (start->right->sym, "C") == 0)
     {
@@ -163,28 +118,32 @@ void Frt_Invade (Node* start, int comp)
 {
     comp1++;
     int temp = comp1;
+    fprintf (f, "%s ", key_words_str [SUDDENLY]);
+    Frt_Expr (start->left->left);
+    fprintf (f, " %s ", key_words_str [INVADE]);
+    Frt_Expr (start->left->right);
+    fprintf (f, "\n");
+    fprintf (f, "%s\n", key_words_str [BEGIN]);
     Frt_One_Cond (start, comp1);
 
-    fprintf (f, "comp%d_out:\n\n\n", temp);
+    fprintf (f, "%s\n", key_words_str [END]);
 }
 
 void Frt_Assign (Node* start)
 {
     int var_num = start->left->data;
 
+    fprintf (f, "%s имеет_силу ", start->left->sym);
     Frt_Expr (start->right);
-    fprintf (f, "pop [ax+%d]\n", var_num);
+    fprintf (f, "\n");
 
 }
 
 void Frt_Return (Node* start)
 {
+    fprintf (f, "В_Рим_возвращается ");
     Frt_Expr (start->right);
-    fprintf (f, "\npush ax\n");
-    fprintf (f, "push %d\n", MAX_VAR_IN_FUNC);
-    fprintf (f, "min\n");
-    fprintf (f, "pop ax\n");
-    fprintf (f, "ret\n\n");
+    fprintf (f, "\n");
 }
 
 void Frt_Call_Args (Node* start)
@@ -198,16 +157,11 @@ void Frt_Call_Func (Node* start)
 {
     char* func = start->right->sym;
 
+    fprintf (f, "%s (", func);
+
     if (start->left)
         Frt_Call_Args (start->left);
-
-    fprintf (f, "push ax\n");
-    fprintf (f, "push %d\n", MAX_VAR_IN_FUNC);
-    fprintf (f, "add\n");
-    fprintf (f, "pop ax\n");
-
-    fprintf (f, "call %s:\n\n", func);
-
+    fprintf (f, ")");
 }
 
 void Frt_Func (Node* start, int comp)
@@ -215,7 +169,11 @@ void Frt_Func (Node* start, int comp)
     assert (start);
 
     if (strcmp (start->sym, "B") == 0)
+    {
+        fprintf (f, "AVE_MARIA!\n\n");
         Frt_Func (start->right, comp);
+        fprintf (f, "\nDEUS_VULT!\n");
+    }
     if (start->right == 0)
             return;
     if (start->right->node_type == CALL)
@@ -267,17 +225,17 @@ void Frt_Func_Args (Node* start)
     if (start->left)
         Frt_Func_Args (start->left);
 
-    fprintf (f, "pop [ax+%d]\n", (int)start->right->data);
+    fprintf (f, "%s", start->right->sym);
 }
 
 void Frt_Func_Up (Node* start, int comp)
 {
-    fprintf (f, "%s:\n", start->right->sym);
+    fprintf (f, "%s (", start->right->sym);
 
     if (start->left)
         Frt_Func_Args (start->left);
 
-    fprintf (f, "\n");
+    fprintf (f, ")\n");
 
     if (start->right)
     {
@@ -286,7 +244,7 @@ void Frt_Func_Up (Node* start, int comp)
 
 }
 
-void Back_End_Cycle (Node* start, int comp)
+void Frt_End_Cycle (Node* start, int comp)
 {
     switch ((int)(start->right->node_type))
     {
@@ -311,19 +269,14 @@ void Back_End_Cycle (Node* start, int comp)
 
 void Frt_End (Node* start, Hash* hash1, int comp)
 {
-    f = fopen (file_asm, "w");
+    f = fopen ("From Frontend-1 with love.txt", "w");
     hash = hash1;
 
-    fprintf (f, "call %s:\n", MAIN);
     int randd = rand()%1000 + 1000;
-    fprintf (f, "jmp end%d:\n\n\n", randd);
 
     Frt_End_Cycle (start->right, comp);
 
-    fprintf (f, "end%d:\n", randd);
-    fprintf (f, "end");
 
     fclose (f);
 }
 
-*/

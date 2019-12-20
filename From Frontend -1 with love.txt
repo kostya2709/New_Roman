@@ -1,0 +1,74 @@
+factorial:
+pop [ax+0]
+
+push [ax+0]
+push 1
+je comp1:
+jmp comp1_else:
+comp1:
+push 1
+
+push ax
+push 64
+min
+pop ax
+ret
+
+
+
+jmp comp1_out:
+comp1_else:
+
+comp1_out:
+
+
+
+push [ax+0]
+push [ax+0]
+push 1
+min
+push ax
+push 64
+add
+pop ax
+call factorial:
+
+mul
+
+push ax
+push 64
+min
+pop ax
+ret
+
+
+
+
+main:
+
+in
+pop [ax+0]
+
+push [ax+0]
+push ax
+push 64
+add
+pop ax
+call factorial:
+
+pop [ax+1]
+
+push [ax+1]
+out
+
+push 0
+
+push ax
+push 64
+min
+pop ax
+ret
+
+
+
+
