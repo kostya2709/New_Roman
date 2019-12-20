@@ -257,8 +257,8 @@ Node* Get_Expr (void)
         Node* res2 = Get_Top();
 
         if (prev->data == ADD)
-            res3 = Create_Node(res3, res2, NULL, ADD, "+", OPERATOR);
-        else res3 = Create_Node(res3, res2, NULL, MIN, "-", OPERATOR);
+            res3 = Create_Node (res3, res2, NULL, ADD, "+", OPERATOR);
+        else res3 = Create_Node (res3, res2, NULL, MIN, "-", OPERATOR);
     }
 
     return res3;

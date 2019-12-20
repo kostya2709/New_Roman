@@ -33,16 +33,23 @@ printf ("sssuk\n");
     int i = 0;
     for (i = 0; i < com_num; i++)
     {
-        printf ("%i data = %lg, type = %d\n", i, node_line[i]->data, node_line[i]->node_type);
+        printf ("%i sym = %s, data = %lg, type = %d\n", i, node_line[i]->sym, node_line[i]->data, node_line[i]->node_type);
     }
 
     Hash* hash;
     Tree prog_tree;
     prog_tree.Insert_Node(Get_General(node_line, &hash));
     prog_tree.Tree_Simplifier(prog_tree.first_elem);
-    Tree standard_tree;
-    standard_tree.Insert_Node (Tree_Copy (prog_tree.first_elem));
-    prog_tree.Dump();
+
+    //prog_tree.Dump();
+
+    prog_tree.File_Write ("From Frontend with love.txt");
+
+    printf ("\n\nBEFORE FILE_READ\n\n");
+    Tree read_tree;
+    read_tree.File_Read ("From Frontend with love.txt", *hash);
+    read_tree.File_Write ("From Frontend-1 with love.txt");
+    read_tree.Dump();
 
     Back_End (prog_tree.first_elem, hash, 0);
 

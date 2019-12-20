@@ -300,3 +300,11 @@ Node* Copy_Node (Node* node)
     sprintf (ans->sym, "%s", node->sym);
     return ans;
 }
+
+int Change_Node (Node& node1, elem_t data, char* sym, char node_type)
+{
+    node1.data = data;
+    sprintf (node1.sym, "%s", sym);
+    node1.node_type = node_type;
+    return 1;
+}

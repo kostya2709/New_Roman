@@ -51,7 +51,7 @@ Node** Tokenization (const poem_line* pointer, int num_lines, int& com_num)
 
             cur_sym = *program_str;
 
-        if (isdigit (cur_sym)/* || (cur_sym == '-')*/)
+        if (isdigit (cur_sym))
         {
             sscanf (program_str, "%lf %n", &cur_val, &letter_num);
             array[cur_com_num] = Create_Node(NULL, NULL, NULL, cur_val, "", NUMBER);

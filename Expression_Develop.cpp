@@ -31,6 +31,7 @@ int Tree::Calculate_Consts (Node* node1)
                     if (node1->parent->right == node1)
                         side = 1;
 
+
                     Node* temp_n = Create_Node (NULL, "temp", LINK);
                     Insert_Node (temp_n, node1->right, 1);
                     Tree temp;
@@ -219,7 +220,6 @@ int Tree::Kill_Zero (Node* node1)
 
 int Tree::Kill_One (Node* node1)
 {
-printf ("LEt's kill one\n");
     Node* kill = NULL;
     Node* live = NULL;
     int dir = 0;
@@ -253,9 +253,9 @@ printf ("LEt's kill one\n");
     }
 
     if ((node1->data == LOG) || (node1->data == POW) || (node1->data == MUL) || ((node1->data == DIV)&&(dir == 1)))
-    {printf ("near\n");
+    {
         if (node1 == this->first_elem)
-            {Insert_Node(live);printf ("ok\n");}
+            Insert_Node(live);
         else
             if (node1 == node1->parent->left)
                 Insert_Node(node1->parent, live, 0);

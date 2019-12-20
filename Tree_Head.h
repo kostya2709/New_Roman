@@ -25,6 +25,27 @@ const int FILE_NAME_SIZE = 32;
 const int operator_size = 128;
 
 
+struct Hash
+{
+    int64_t* oper;
+    int64_t* k_words;
+
+    int64_t* var;
+    int var_amount;
+
+    int last_global;
+
+    int64_t* funcs;
+    int* args;
+    int funcs_num;
+
+    Hash();
+    ~Hash();
+    int Add_Var (int64_t var_name);
+    int Add_Func (int64_t func_hash);
+};
+
+
 struct Node
 {
 public:
@@ -75,7 +96,7 @@ public:
     int Dump (void);
 
     /*!This function reads the information about the tree from the file f*/
-    int File_Read (char* file_name);
+    int File_Read (char* file_name, Hash& hash);
 
     int Make_Simple_Tree (Node* node1);
 
@@ -84,6 +105,8 @@ public:
     Node* Find_Derive (Node* node1);
 
     void Tree_Simplifier (Node* node1);
+
+    int File_Write (char* file_name);
 
     ~Tree();
 
@@ -94,34 +117,12 @@ private:
     /*! An auxiliary function. Prints info about a tree to a GV file.*/
     void Tree_Info_Dump (const Node* node1, FILE* f);
 
-    /*!An auxiliary function for File_Read.*/
-    void File_Read_Cycle (Node* node1);
-
     int Kill_One (Node* node1);
 
     int Kill_Zero (Node* node1);
 
 };
 
-struct Hash
-{
-    int64_t* oper;
-    int64_t* k_words;
-
-    int64_t* var;
-    int var_amount;
-
-    int last_global;
-
-    int64_t* funcs;
-    int* args;
-    int funcs_num;
-
-    Hash();
-    ~Hash();
-    int Add_Var (int64_t var_name);
-    int Add_Func (int64_t func_hash);
-};
 
 char* Delete_Str_Trash (char* str);
 
@@ -168,3 +169,4 @@ Tree* Derive_Main (char* file_name, char* der_var, int der_num, double value);
 
 int Write_Double_To_PDF (double value);
 
+int Change_Node (Node& node1, elem_t data, char* sym, char node_type);

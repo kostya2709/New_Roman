@@ -119,4 +119,4 @@ static char* oper_str[] =
 
 static const char* NEMO = "NIHIL";
 
-static const char* MAIN = "Рим";
+static const char* MAIN = "main";
