@@ -26,7 +26,7 @@ int param_num_call_cur = 0;
 char print_var [10] = {};
 int MAX_ARG_REG_NUM = 2;
 
-inline void (*Print_Str_x86 [3][2][3])(int command, int dst, int src);
+inline void (*Print_Str_x86 [10]) (void);
 
 enum
 {
@@ -49,62 +49,143 @@ enum
 
 const char* arg_registers[] = 
 {
-    "rdi", "rsi", "rdx", "rcx", "r8", "r9", "rax"
+    "rdi", "rsi", "rdx", "rcx", "r8", "r9", "rax", "r15"
 };
 
 enum
 {
-    rdi, rsi, rdx, rcx, r8, r9, arg_rax
+    rdi, rsi, rdx, rcx, r8, r9, arg_rax, cmp_r15
 };
 
 enum
 {
-    __MEM, __REG, __IMM, __ARG
+    __IMM,  __REG, __VAR, __ARG
 };
 
 const char* commands[] = 
 {
-    "mov", "add", "lea" 
+    "add", "lea" 
 };
 
 enum 
 {
-    __MOV, __ADD, __LEA, __SUB, __MUL, __DIV
+    __ADD, __SUB, __MUL, __DIV, __MOV, __NUL, __TO_RAX, __FROM_RAX, __FREE_RDX, __BACK_RDX
 };
 
-inline void Print_SUB_MEM_REG (int command, int dst, int src)
+char* the_register          = NULL;
+char* next_register         = NULL;
+char str_template [2][10]   = {};
+
+inline void Print_SUB (void)
 {
-    fprintf (f_x86, "\t%s qword [rbp-%d], %d\n", commands [command], (dst + 1) * 8, calc_registers [src]);
+    fprintf (f_x86, "\tsub %s, qword %s\n", the_register, str_template [1]);
 }
 
-inline void Print_SUB_MEM_IMM (int command, int dst, int src)
+inline void Print_MUL (void)
 {
-    fprintf (f_x86, "\t%s qword [rbp-%d], %d\n", commands [command], (dst + 1) * 8, src);
+    fprintf (f_x86, "\timul %s\n", str_template [1]);
 }
 
-inline void Print_SUB_REG_MEM (int command, int dst, int src)
+inline void Print_DIV (void)
 {
-    fprintf (f_x86, "\t%s %s, qword [rbp-%d]\n", commands [command], calc_registers [dst], (src + 1) * 8);
+    fprintf (f_x86, "\tcqo\n");
+    fprintf (f_x86, "\tidiv %s\n", str_template [1]);
 }
 
-inline void Print_SUB_REG_REG (int command, int dst, int src)
+inline void Print_MOV (void)
 {
-    fprintf (f_x86, "\t%s %s, %s\n", commands [command], calc_registers [dst], calc_registers [src]);
+    fprintf (f_x86, "\tmov %s, qword %s\n", the_register, str_template [0]);
 }
 
-inline void Print_SUB_REG_IMM (int command, int dst, int src)
+inline void Print_TO_RAX (void)
 {
-    fprintf (f_x86, "\t%s %s, %d\n", commands [command], calc_registers [dst], src);
+    fprintf (f_x86, "\tmov rax, qword %s\n", str_template [0]);
 }
 
-void Print_Asm_Str (int command, int src_type, int dst_type, int src, int dst)
+inline void Print_FROM_RAX (void)
 {
+    fprintf (f_x86, "\tmov %s, rax\n", the_register);
+}
+
+inline void Print_FREE_RDX (void)
+{
+    fprintf (f_x86, "\tmov %s, rdx\n", the_register);
+}
+
+inline void Print_BACK_RDX (void)
+{
+    fprintf (f_x86, "\tmov rdx, %s\n", the_register);
+}
+
+inline void Print_NUL (void)
+{
+    return;
+}
+
+char* ((*String_Maker [3]))(int result, int temp_num);
+
+char* Make_IMM (int result, int temp_num)
+{
+    sprintf (str_template [temp_num], "%d", result);
+}
+
+char* Make_VAR (int result, int temp_num)
+{
+    sprintf (str_template [temp_num], "%s", Print_Var_x86 (result));
+}
+
+char* Make_REG (int result, int temp_num)
+{
+    sprintf (str_template [temp_num], "%s", calc_registers [result]);
+}
+
+void Make_Func_Array (void)
+{
+    String_Maker [__IMM] = Make_IMM;
+    String_Maker [__REG] = Make_REG;
+    String_Maker [__VAR] = Make_VAR;
+
+
+    Print_Str_x86 [__SUB]      = Print_SUB;
+    Print_Str_x86 [__MOV]      = Print_MOV;
+    Print_Str_x86 [__NUL]      = Print_NUL;
+    Print_Str_x86 [__TO_RAX]   = Print_TO_RAX;
+    Print_Str_x86 [__FROM_RAX] = Print_FROM_RAX;
+    Print_Str_x86 [__MUL]      = Print_MUL;
+    Print_Str_x86 [__DIV]      = Print_DIV;
+    Print_Str_x86 [__FREE_RDX] = Print_FREE_RDX;
+    Print_Str_x86 [__BACK_RDX] = Print_BACK_RDX;
+
+}
+
+
+int Print_Manager (int command, int left_type, int right_type, int left_val, int right_val, bool on_top, int& register_count, int& ret_flag)
+{
+    bool is_reg = (left_type == __REG);
+    bool move_rax = (command == __MUL) || (command == __DIV);
+    bool move_rdx = (func_args >= rdx && (command == __MUL || command == __DIV));
+
+    int the_reg = (is_reg)? left_val * (!on_top): register_count * (!on_top);       //rax = 0 - is used if on_top
+    the_register = const_cast <char*> (calc_registers [the_reg]);
+    next_register = const_cast <char*> (calc_registers [register_count + 1]);   
+    register_count += (!on_top) && (!is_reg);
+
+    String_Maker [left_type]  (left_val, 0);
+    String_Maker [right_type] (right_val, 1);
+
+    Print_Str_x86 [((__MOV * (!is_reg) + is_reg * __NUL) * (!on_top) + (on_top) * __NUL) * (!move_rax) + (move_rax) * __NUL]();
+    Print_Str_x86 [__TO_RAX * (on_top || move_rax) + (!(on_top || move_rax)) * __NUL]();
+    Print_Str_x86 [__FREE_RDX * (move_rdx) + (!move_rdx) * __NUL]();    
+
+    Print_Str_x86 [command]();
+
+    Print_Str_x86 [__FROM_RAX * (move_rax && !on_top) + !(move_rax && !on_top) * __NUL]();
+    Print_Str_x86 [__BACK_RDX * (move_rdx) + (!(move_rdx)) * __NUL]();
+
+    register_count = (is_reg) && (right_type == __REG)? std::min (left_val, right_val) : register_count;
     
-    Print_Str_x86 [__SUB][__MEM][__REG] = Print_SUB_MEM_REG;
-    Print_Str_x86 [__SUB][__MEM][__IMM] = Print_SUB_MEM_IMM;
-    Print_Str_x86 [__SUB][__REG][__MEM] = Print_SUB_REG_MEM;
-    Print_Str_x86 [__SUB][__REG][__REG] = Print_SUB_REG_REG;
-    Print_Str_x86 [__SUB][__REG][__IMM] = Print_SUB_REG_IMM;
+    ret_flag = return_register;
+    return the_reg;
 }
 
 int Push_Expr_x86 (Node* start, int& ret_flag, int& register_count, bool on_top)
@@ -269,17 +350,17 @@ int Push_Expr_x86 (Node* start, int& ret_flag, int& register_count, bool on_top)
             }
             case MIN:
             {
-                
+                return Print_Manager (__SUB, left_state, right_state, left_res, right_res, on_top, register_count, ret_flag);
                 break;
             }
             case MUL:
             {
-                fprintf (f_x86, "mul\n");
+                return Print_Manager (__MUL, left_state, right_state, left_res, right_res, on_top, register_count, ret_flag);
                 break;
             }
             case DIV:
             {
-                fprintf (f_x86, "div\n");
+                return Print_Manager (__DIV, left_state, right_state, left_res, right_res, on_top, register_count, ret_flag);
                 break;
             }
             case SQRT:
@@ -409,46 +490,47 @@ void Push_One_Cond_x86 (Node* start, int comp)
         fprintf (f_x86, "while_comp%d_back:\n", comp);
     }
 
-    //Push_Expr_x86 (left);
-    //Push_Expr_x86 (right);
+    Push_Expr_x86 (left, __REG, cmp_r15);
+    Push_Expr_x86 (right, __REG, arg_rax);
 
+    fprintf (f_x86, "\tcmp r15, rax\n");
 
     switch ((int)(condi->data))
     {
         case MORE:
         {
-            fprintf (f_x86, "jg ");
+            fprintf (f_x86, "\tjg ");
             break;
         }
         case EMORE:
         {
-            fprintf (f_x86, "jge ");
+            fprintf (f_x86, "\tjge ");
             break;
         }
         case LESS:
         {
-            fprintf (f_x86, "jl ");
+            fprintf (f_x86, "\tjl ");
             break;
         }
         case ELESS:
         {
-            fprintf (f_x86, "jle ");
+            fprintf (f_x86, "\tjle ");
             break;
         }
         case EQUAL:
         {
-            fprintf (f_x86, "je ");
+            fprintf (f_x86, "\tje ");
             break;
         }
         case UNEQUAL:
         {
-            fprintf (f_x86, "jne ");
+            fprintf (f_x86, "\tjne ");
             break;
         }
     }
 
-    fprintf (f_x86, "comp%d:\n", comp);
-    fprintf (f_x86, "jmp comp%d_else:\n", comp);
+    fprintf (f_x86, "comp%d\n", comp);
+    fprintf (f_x86, "\tjmp comp%d_else\n", comp);
     fprintf (f_x86, "comp%d:\n", comp);
 
     int temp_comp = comp;
@@ -458,10 +540,11 @@ void Push_One_Cond_x86 (Node* start, int comp)
     else Push_Func_x86 (start->right, comp1_x86);
 
     if (in_while)
-        fprintf (f_x86, "jmp while_comp%d_back:\n", temp_comp);
+        fprintf (f_x86, "\tjmp while_comp%d_back\n", temp_comp);
 
 
-    if (!in_while) fprintf (f_x86, "jmp comp%d_out:\n", comp);
+    if (!in_while) 
+        fprintf (f_x86, "\tjmp comp%d_out\n", comp);
     fprintf (f_x86, "comp%d_else:\n\n", temp_comp);
 
     if (strcmp (start->right->sym, "C") == 0)
@@ -516,6 +599,11 @@ void Push_Assign_x86 (Node* start)
 void Push_Return_x86 (Node* start)
 {
     Push_Expr_x86 (start->right, __REG, arg_rax);
+
+    fprintf (f_x86, "\tmov rsp, rbp\n");
+    fprintf (f_x86, "\tpop rbp\n");
+    fprintf (f_x86, "\tret\n");
+
 }
 
 
@@ -679,6 +767,8 @@ void Back_End_Cycle_x86 (Node* start, int comp)
 
 void Back_End_x86 (Node* start, Hash* hash1, int comp)
 {
+    Make_Func_Array();
+
     const char* file_asm = "res_x86.asm";
     f_x86 = fopen (file_asm, "w");
     hash_x86 = hash1;
