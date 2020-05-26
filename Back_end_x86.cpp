@@ -13,6 +13,14 @@ void Call_Func_x86 (Node* start);
 
 char* Print_Var_x86 (int var_index);
 
+void Print_Digit_Func (FILE* f_x86);
+
+void Print_Digit_Call (FILE* f_x86);
+
+void Print_SQRT_ASM (FILE* f_x86);
+
+void Print_Data (FILE* f_x86);
+
 FILE* f_x86;
 
 Hash* hash_x86;
@@ -25,6 +33,11 @@ int param_num_call_cur = 0;
 
 char print_var [10] = {};
 int MAX_ARG_REG_NUM = 2;
+
+constexpr uint Accuracy = 2;
+const uint Acc_pow = pow (10, Accuracy);
+
+int need_print = 0;
 
 inline void (*Print_Str_x86 [10]) (void);
 
@@ -62,14 +75,9 @@ enum
     __IMM,  __REG, __VAR, __ARG
 };
 
-const char* commands[] = 
-{
-    "add", "lea" 
-};
-
 enum 
 {
-    __ADD, __SUB, __MUL, __DIV, __MOV, __NUL, __TO_RAX, __FROM_RAX, __FREE_RDX, __BACK_RDX
+    __ADD, __SUB, __MUL, __DIV, __MOV, __NUL, __TO_RAX, __FROM_RAX, __FREE_RDX, __BACK_RDX, __SQRT
 };
 
 char* the_register          = NULL;
@@ -81,16 +89,6 @@ inline void Print_SUB (void)
     fprintf (f_x86, "\tsub %s, qword %s\n", the_register, str_template [1]);
 }
 
-inline void Print_MUL (void)
-{
-    fprintf (f_x86, "\timul %s\n", str_template [1]);
-}
-
-inline void Print_DIV (void)
-{
-    fprintf (f_x86, "\tcqo\n");
-    fprintf (f_x86, "\tidiv %s\n", str_template [1]);
-}
 
 inline void Print_MOV (void)
 {
@@ -115,6 +113,31 @@ inline void Print_FREE_RDX (void)
 inline void Print_BACK_RDX (void)
 {
     fprintf (f_x86, "\tmov rdx, %s\n", the_register);
+}
+
+inline void Print_SQRT (void)
+{
+    fprintf (f_x86, "\tmov r15, %u\n", Acc_pow);
+    fprintf (f_x86, "\timul r15\n");
+    Print_SQRT_ASM (f_x86);
+}
+
+inline void Print_MUL (void)
+{
+    fprintf (f_x86, "\tmov r15, %s\n", str_template [1]);
+    fprintf (f_x86, "\timul r15\n");
+    fprintf (f_x86, "\tmov r15, %u\n", Acc_pow);
+    fprintf (f_x86, "\tcqo\n");
+    fprintf (f_x86, "\tidiv r15\n");
+}
+
+inline void Print_DIV (void)
+{
+    fprintf (f_x86, "\tmov r15, %u\n", Acc_pow);
+    fprintf (f_x86, "\timul r15\n");
+    fprintf (f_x86, "\tmov r15, %s\n", str_template [1]);
+    fprintf (f_x86, "\tcqo\n");
+    fprintf (f_x86, "\tidiv r15\n");
 }
 
 inline void Print_NUL (void)
@@ -155,6 +178,7 @@ void Make_Func_Array (void)
     Print_Str_x86 [__DIV]      = Print_DIV;
     Print_Str_x86 [__FREE_RDX] = Print_FREE_RDX;
     Print_Str_x86 [__BACK_RDX] = Print_BACK_RDX;
+    Print_Str_x86 [__SQRT]     = Print_SQRT;
 
 }
 
@@ -230,7 +254,7 @@ int Push_Expr_x86 (Node* start, int& ret_flag, int& register_count, bool on_top)
     if (start->node_type == NUMBER)
     {
         ret_flag = return_number;
-        return start->data;
+        return start->data * Acc_pow;
     }
 
     if (start->node_type == OPERATOR)
@@ -365,7 +389,7 @@ int Push_Expr_x86 (Node* start, int& ret_flag, int& register_count, bool on_top)
             }
             case SQRT:
             {
-                fprintf (f_x86, "sqrt\n");
+                return Print_Manager (__SQRT, right_state, left_state, right_res, left_res, on_top, register_count, ret_flag);
                 break;
             }
         }
@@ -463,9 +487,10 @@ int Push_Expr_x86 (Node* start, int answer_type, int answer_index)
 
 void Push_Print_x86 (Node* start)
 {
-    int var = start->right->data;
-    fprintf (f_x86, "push [ax+%d]\n", var);
-    fprintf (f_x86, "out\n");
+    Push_Expr_x86 (start->right, __REG, arg_rax);
+    fprintf (f_x86, "\tmov r14, %d\n\n", Accuracy);
+    Print_Digit_Call (f_x86);
+    need_print = 1;
 }
 
 void Push_Read_x86 (Node* start)
@@ -773,6 +798,8 @@ void Back_End_x86 (Node* start, Hash* hash1, int comp)
     f_x86 = fopen (file_asm, "w");
     hash_x86 = hash1;
 
+    Print_Data (f_x86);
+
     fprintf (f_x86, "section .text\n\n");
     fprintf (f_x86, "global _start\n\n\n");
     fprintf (f_x86, "_start:\n");
@@ -783,6 +810,9 @@ void Back_End_x86 (Node* start, Hash* hash1, int comp)
     fprintf (f_x86, "ret\n");
 
     Back_End_Cycle_x86 (start->right, comp);
+
+    if (need_print == 1)
+        Print_Digit_Func (f_x86);
 
     fclose (f_x86);
 }
