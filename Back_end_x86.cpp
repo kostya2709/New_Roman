@@ -1,11 +1,13 @@
 #include "Front_Head.h"
 
 #include <algorithm>
-#include "Calc_tree_handler.cpp"
+//#include "Calc_tree_handler.cpp"
 
 void Back_End_Cycle_x86(Node* start);
 
 void Push_Call_Func_x86 (Node* start);
+
+
 
 void Push_Func_x86 (Node* start, int comp);
 
