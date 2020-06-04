@@ -136,9 +136,9 @@ You can compare the code with its C/C++ equivalent
 ```C
 #include <stdio.h>
 
-int Gallician_War (int Caesar)
+double Gallician_War (double Caesar)
 {
-  int Gauls = 0;
+  double Gauls = 0;
   
   if (Caesar <= Gauls)
     return 1;
@@ -148,11 +148,11 @@ int Gallician_War (int Caesar)
 
 int main()
 {
-  int Caesar = 0;
-  scanf ("%d", &Caesar);
-  int messenger = Gallician_War (Caesar);
+  double Caesar = 0;
+  scanf ("%lg", &Caesar);
+  double messenger = Gallician_War (Caesar);
   printf ("The result of the war:\n");
-  printf ("%d", messenger);
+  printf ("%lg", messenger);
   
   return 0;
 }
@@ -162,7 +162,27 @@ int main()
 Some comments:
 * It is possible to write numbers using both roman numbers, and arabic ones (but roman numbers are preferable of course)
 * It is possible to name identificators both in English, and in Russian.
+* All numbers in a program have the same accuracy.
 
+## How it works
 
+### Tokenization
+At first, the whole text is divided into small logically independent parts. This process is called **Tokenization**
+(you can see functions, used at this stage, in the file Tokenization.cpp). 
 
+### Recursive descend
+After tokenization all the tokens are built 
+into a program tree using recursive descend. This tree can be visualized using [graphviz](http://www.graphviz.org/).
+Different colours of tokens represent different rolls of the tokens.
 
+### Write/read program tree
+It is possible to read a program tree from a text file. In this case the previous two stages can be skipped. 
+Thanks to this feature it is possible to read and execute programs which are written in a different language but have 
+an appropriate program tree (for instance, [Anastas' language](https://github.com/AnastasMIPT/Language)).
+
+It is also possible to write the program tree built in the resursive descend into a text file.
+
+### Backend
+At this stage the program tree is translated into an assembly. My [first backend](https://github.com/kostya2709/New_Roman/blob/master/Back_end.cpp) translates the program tree into my own assembly CPU [emulator](https://github.com/kostya2709/Assembler-CPU). The [second backend](https://github.com/kostya2709/New_Roman/blob/master/Back_end_x86.cpp) translates the program tree into x86-64 assembly.
+It uses many optimizations comparing with the first backend. For instance, it uses registers for functions parameters,
+for calculus, etc. 
