@@ -11,7 +11,7 @@ int main()
     long int program_size = 0;
     long int num_lines = 0;
     char* program_name = (char*)calloc (1, MAX_PROGRAM_NAME_SIZE);
-    sprintf ((char*)program_name, "program_qq.txt");
+    sprintf ((char*)program_name, "Examples/program_qq.txt");
     char* program_str = NULL;
 
     program_str = File_Reader (program_name, &num_lines, &program_size);

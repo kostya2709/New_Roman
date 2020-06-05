@@ -8,6 +8,7 @@ void Back_End_Cycle_x86(Node* start);
 void Push_Call_Func_x86 (Node* start);
 
 
+//I HATE GITHUB
 
 void Push_Func_x86 (Node* start, int comp);
 

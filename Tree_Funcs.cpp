@@ -78,8 +78,8 @@ int Tree::Dump (void)
     char* file_png = (char*)calloc (1, FILE_NAME_SIZE);
 
 
-    file_name = "equation_print.gv";
-    file_png = "equation_print_pic.png";
+    file_name = "Images/equation_print.gv";
+    file_png = "Images/equation_print_pic.png";
 
     FILE* f = fopen (file_name, "w");
 
@@ -92,12 +92,12 @@ int Tree::Dump (void)
 
     fclose (f);
 
-    system ("dot -Tpng equation_print.gv -o equation_print_pic.png");
-    system ("xdg-open equation_print_pic.png");
+    system ("dot -Tpng Images/equation_print.gv -o Images/equation_print_pic.png");
+    system ("xdg-open Images/equation_print_pic.png");
 
 
-    file_name = "equation_dump.gv";
-    file_png = "equation_dump_pic.png";
+    file_name = "Images/equation_dump.gv";
+    file_png = "Images/equation_dump_pic.png";
 
     f = fopen (file_name, "w");
 
@@ -110,7 +110,7 @@ int Tree::Dump (void)
 
     fclose (f);
 
-    system ("dot -Tpng equation_dump.gv -o equation_dump_pic.png");
+    system ("dot -Tpng Images/equation_dump.gv -o Images/equation_dump_pic.png");
 
 
     return 0;
