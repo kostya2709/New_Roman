@@ -163,12 +163,20 @@ Some comments:
 * It is possible to write numbers using both roman numbers, and arabic ones (but roman numbers are preferable of course)
 * It is possible to name identificators both in English, and in Russian.
 * All numbers in a program have the same accuracy.
+* More examples you can see in the folder ["Examples"](https://github.com/kostya2709/New_Roman/tree/master/Examples).
 
 ## How it works
 
 ### Tokenization
 At first, the whole text is divided into small logically independent parts. This process is called **Tokenization**
 (you can see functions, used at this stage, in the file Tokenization.cpp). 
+
+An example of a program tree: ![tree1](https://github.com/kostya2709/New_Roman/blob/master/Images/factorial.png)
+
+The same tree, but with more information about nodes: ![tree2](https://github.com/kostya2709/New_Roman/blob/master/Images/factorial_dump.png)
+
+
+>N.B.! Both these pictures were created automatically. These trees represent the program, counting factorial.
 
 ### Recursive descend
 After tokenization all the tokens are built 
