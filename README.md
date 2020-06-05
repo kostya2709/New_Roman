@@ -171,9 +171,17 @@ Some comments:
 At first, the whole text is divided into small logically independent parts. This process is called **Tokenization**
 (you can see functions, used at this stage, in the file Tokenization.cpp). 
 
-An example of a program tree: ![tree1](https://github.com/kostya2709/New_Roman/blob/master/Images/factorial.png)
+An example of a program tree: 
 
-The same tree, but with more information about nodes: ![tree2](https://github.com/kostya2709/New_Roman/blob/master/Images/factorial_dump.png)
+![tree1](https://github.com/kostya2709/New_Roman/blob/master/Images/factorial.png)
+
+
+The same tree, but with more information about nodes: 
+
+
+![tree2](https://github.com/kostya2709/New_Roman/blob/master/Images/factorial_dump.png)
+
+
 
 
 >N.B.! Both these pictures were created automatically. These trees represent the program, counting factorial.
