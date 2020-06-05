@@ -171,6 +171,12 @@ Some comments:
 At first, the whole text is divided into small logically independent parts. This process is called **Tokenization**
 (you can see functions, used at this stage, in the file Tokenization.cpp). 
 
+### Recursive descend
+After tokenization all the tokens are built 
+into a program tree using recursive descend. This tree can be visualized using [graphviz](http://www.graphviz.org/).
+Different colours of tokens represent different rolls of the tokens.
+
+
 An example of a program tree: 
 
 ![tree1](https://github.com/kostya2709/New_Roman/blob/master/Images/factorial.png)
@@ -186,10 +192,6 @@ The same tree, but with more information about nodes:
 
 >N.B.! Both these pictures were created automatically. These trees represent the program, counting factorial.
 
-### Recursive descend
-After tokenization all the tokens are built 
-into a program tree using recursive descend. This tree can be visualized using [graphviz](http://www.graphviz.org/).
-Different colours of tokens represent different rolls of the tokens.
 
 ### Write/read program tree
 It is possible to read a program tree from a text file. In this case the previous two stages can be skipped. 
